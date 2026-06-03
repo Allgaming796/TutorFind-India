@@ -42,7 +42,7 @@ export const AuthScreen: React.FC = () => {
     } catch (err) {
       // If demo account doesn't exist yet, sign up automatically
       try {
-        await signUp(demoEmail, demoPass, selectedRole === "student" ? "Demo Student" : "Demo Tutor", selectedRole);
+        await signUp(demoEmail, demoPass, selectedRole === "student" ? "Demo Student" : "ASHVIKA", selectedRole);
       } catch (signupErr) {
         triggerToast("Demo mode initialized in sandboxed state.");
       }
