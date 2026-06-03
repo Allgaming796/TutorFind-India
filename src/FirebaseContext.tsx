@@ -6,27 +6,7 @@ import {
   signOut,
   onAuthStateChanged 
 } from "firebase/auth";
-import { 
-  doc, 
-  collection, 
-  query, 
-  where, 
-  getDocs,
-  setDoc,
-  serverTimestamp,
-  orderBy
-} from "firebase/firestore";
-import { 
-  auth, 
-  db, 
-  dbGetDoc, 
-  dbSetDoc, 
-  dbUpdateDoc, 
-  dbAddDoc, 
-  dbOnSnapshot, 
-  OperationType,
-  handleFirestoreError
-} from "./firebase";
+import { auth } from "./firebase";
 import { UserProfile, Booking, Chat, Message } from "./types";
 import { INITIAL_TUTORS_DATA } from "./constants";
 
@@ -82,147 +62,165 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }, 3000);
   };
 
-  // 1. Boostrap Initial Tutors into Firestore if they do not exist
-  const bootstrapTutors = async () => {
-    try {
-      const q = query(collection(db, "users"), where("role", "==", "tutor"));
-      const snap = await getDocs(q);
-      if (snap.empty) {
-        console.log("No default tutors found. Bootstrapping initial database profiles...");
-        for (const tutor of INITIAL_TUTORS_DATA) {
-          // Store each tutor in the 'users' collection
-          await setDoc(doc(db, "users", tutor.uid), {
-            uid: tutor.uid,
-            name: tutor.name,
-            email: tutor.email,
-            city: tutor.city,
-            subjects: tutor.subjects,
-            grade: tutor.grade,
-            rate: tutor.rate,
-            rating: tutor.rating,
-            reviewsCount: tutor.reviewsCount,
-            mode: tutor.mode,
-            exp: tutor.exp,
-            bio: tutor.bio,
-            avatar: tutor.avatar,
-            color: tutor.color,
-            online: tutor.online,
-            qual: tutor.qual,
-            role: tutor.role,
-            walletBalance: 0,
-            totalEarned: 0,
-            withdrawn: 0
-          });
-        }
+  const getLocalBookings = (): Booking[] => {
+    return JSON.parse(localStorage.getItem("tutorfind_bookings") || "[]");
+  };
+
+  const saveLocalBookings = (newBookings: Booking[]) => {
+    localStorage.setItem("tutorfind_bookings", JSON.stringify(newBookings));
+    if (currentUser && userProfile) {
+      const filtered = newBookings.filter(b => 
+        userProfile.role === "tutor" ? b.tutorId === currentUser.uid : b.studentId === currentUser.uid
+      );
+      filtered.sort((a, b) => {
+        const ad = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const bd = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return bd - ad;
+      });
+      setBookings(filtered);
+    }
+  };
+
+  const getLocalChats = (): Chat[] => {
+    return JSON.parse(localStorage.getItem("tutorfind_chats") || "[]");
+  };
+
+  const saveLocalChats = (newChats: Chat[]) => {
+    localStorage.setItem("tutorfind_chats", JSON.stringify(newChats));
+    if (currentUser && userProfile) {
+      const filtered = newChats.filter(c => 
+        userProfile.role === "tutor" ? c.tutorId === currentUser.uid : c.studentId === currentUser.uid
+      );
+      filtered.sort((a, b) => b.updatedAt - a.updatedAt);
+      setChats(filtered);
+    }
+  };
+
+  const saveProfileLocally = (uid: string, profile: UserProfile) => {
+    const localProfiles = JSON.parse(localStorage.getItem("tutorfind_user_profiles") || "{}");
+    localProfiles[uid] = profile;
+    localStorage.setItem("tutorfind_user_profiles", JSON.stringify(localProfiles));
+    
+    if (currentUser && currentUser.uid === uid) {
+      setUserProfile(profile);
+    }
+
+    // Also sync the tutors list if they are a tutor
+    if (profile.role === "tutor") {
+      let localTutors = JSON.parse(localStorage.getItem("tutorfind_tutors") || "[]");
+      const idx = localTutors.findIndex((t: any) => t.uid === uid);
+      if (idx !== -1) {
+        localTutors[idx] = { ...localTutors[idx], ...profile };
+      } else {
+        localTutors = [profile, ...localTutors];
       }
-    } catch (err) {
-      console.warn("Bootstrap tutor failed or blocked by rules. This is expected if unsigned.", err);
+      localStorage.setItem("tutorfind_tutors", JSON.stringify(localTutors));
+      setTutors(localTutors);
+    }
+  };
+
+  // 1. Boostrap Initial Tutors into localStorage if they do not exist
+  const bootstrapTutors = async () => {
+    let localTutors = localStorage.getItem("tutorfind_tutors");
+    if (!localTutors) {
+      localStorage.setItem("tutorfind_tutors", JSON.stringify(INITIAL_TUTORS_DATA));
+      setTutors(INITIAL_TUTORS_DATA);
+    } else {
+      setTutors(JSON.parse(localTutors));
     }
   };
 
   // 2. Main Authentication Monitoring
   useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       if (user) {
-        // Authenticated, listen to their user profile
-        const profileRef = doc(db, "users", user.uid);
-        const unsubscribeProfile = dbOnSnapshot(profileRef, (docSnap) => {
-          if (docSnap.exists()) {
-            setUserProfile(docSnap.data() as UserProfile);
-          } else {
-            setUserProfile({
-              uid: user.uid,
-              name: user.displayName || user.email?.split("@")[0] || "User",
-              email: user.email || "",
-              role: "student",
-              walletBalance: 1000, // initial funding
-              totalSpent: 0
-            });
-          }
-          setLoading(false);
-        }, (err) => {
-          console.error("Profile listen error:", err);
-          setLoading(false);
-        });
+        // Authenticated, check physical localStorage profile representation
+        const localProfiles = JSON.parse(localStorage.getItem("tutorfind_user_profiles") || "{}");
+        let profile = localProfiles[user.uid];
+        if (!profile) {
+          const isTutor = user.email?.toLowerCase().includes("tutor") || false;
+          profile = {
+            uid: user.uid,
+            name: user.displayName || user.email?.split("@")[0] || "User",
+            email: user.email || "",
+            role: isTutor ? "tutor" : "student",
+            walletBalance: isTutor ? 0 : 2500, // gift some starting mock credits
+            totalSpent: 0,
+            totalEarned: 0,
+            withdrawn: 0,
+            online: isTutor,
+            rating: isTutor ? 5.0 : undefined,
+            reviewsCount: isTutor ? 12 : undefined,
+            subjects: isTutor ? ["Mathematics", "Physics", "Chemistry"] : [],
+            city: "Mumbai",
+            rate: isTutor ? 450 : undefined,
+            qual: isTutor ? "B.Tech, IIT Bombay" : undefined,
+            exp: isTutor ? "4 Years" : undefined,
+            bio: isTutor ? "Dedicated tutor offering highly personalized sessions." : undefined
+          };
+          localProfiles[user.uid] = profile;
+          localStorage.setItem("tutorfind_user_profiles", JSON.stringify(localProfiles));
+        }
+        setUserProfile(profile);
 
-        return () => unsubscribeProfile();
+        // Load correct list of tutors
+        let localTutors = localStorage.getItem("tutorfind_tutors");
+        let tutorsList = INITIAL_TUTORS_DATA;
+        if (!localTutors) {
+          localStorage.setItem("tutorfind_tutors", JSON.stringify(INITIAL_TUTORS_DATA));
+        } else {
+          tutorsList = JSON.parse(localTutors);
+        }
+
+        if (profile.role === "tutor") {
+          const exists = tutorsList.find(t => t.uid === profile.uid);
+          if (!exists) {
+            tutorsList = [profile, ...tutorsList];
+            localStorage.setItem("tutorfind_tutors", JSON.stringify(tutorsList));
+          } else {
+            tutorsList = tutorsList.map(t => t.uid === profile.uid ? { ...t, ...profile } : t);
+            localStorage.setItem("tutorfind_tutors", JSON.stringify(tutorsList));
+          }
+        }
+        setTutors(tutorsList);
+
+        // Filter bookings and chats for this user ID
+        const allBookings: Booking[] = JSON.parse(localStorage.getItem("tutorfind_bookings") || "[]");
+        const filteredBookings = allBookings.filter(b => 
+          profile.role === "tutor" ? b.tutorId === user.uid : b.studentId === user.uid
+        );
+        filteredBookings.sort((a, b) => {
+          const ad = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const bd = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return bd - ad;
+        });
+        setBookings(filteredBookings);
+
+        const allChats: Chat[] = JSON.parse(localStorage.getItem("tutorfind_chats") || "[]");
+        const filteredChats = allChats.filter(c => 
+          profile.role === "tutor" ? c.tutorId === user.uid : c.studentId === user.uid
+        );
+        filteredChats.sort((a, b) => b.updatedAt - a.updatedAt);
+        setChats(filteredChats);
+
+        setLoading(false);
       } else {
         setUserProfile(null);
+        setBookings([]);
+        setChats([]);
+        setMessages([]);
         setLoading(false);
       }
     });
 
     return () => unsubscribeAuth();
-  }, []);
+  }, [currentUser?.uid]);
 
-  // 3. Real-time lists for tutors, bookings, and chats
+  // Loading Tutors initially representational
   useEffect(() => {
-    // Run bootstrapping once DB client starts up
     bootstrapTutors();
-
-    // Listen to all tutors in real-time
-    const tutorsQuery = query(collection(db, "users"), where("role", "==", "tutor"));
-    const unsubTutors = dbOnSnapshot(tutorsQuery, (snap) => {
-      const list: UserProfile[] = [];
-      snap.forEach((doc: any) => {
-        list.push(doc.data() as UserProfile);
-      });
-      setTutors(list);
-    });
-
-    return () => unsubTutors();
   }, []);
-
-  // Listen to bookings and chats when user is authenticated
-  useEffect(() => {
-    if (!currentUser || !userProfile) {
-      setBookings([]);
-      setChats([]);
-      return;
-    }
-
-    const uid = currentUser.uid;
-    const isTutor = userProfile.role === "tutor";
-
-    // Listen to bookings
-    const bookingsQuery = isTutor
-      ? query(collection(db, "bookings"), where("tutorId", "==", uid))
-      : query(collection(db, "bookings"), where("studentId", "==", uid));
-
-    const unsubBookings = dbOnSnapshot(bookingsQuery, (snap) => {
-      const list: Booking[] = [];
-      snap.forEach((doc: any) => {
-        list.push(doc.data() as Booking);
-      });
-      // Sort bookings by creation date
-      list.sort((a, b) => {
-        const ad = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-        const bd = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-        return bd - ad;
-      });
-      setBookings(list);
-    });
-
-    // Listen to chats
-    const chatsQuery = isTutor
-      ? query(collection(db, "chats"), where("tutorId", "==", uid))
-      : query(collection(db, "chats"), where("studentId", "==", uid));
-
-    const unsubChats = dbOnSnapshot(chatsQuery, (snap) => {
-      const list: Chat[] = [];
-      snap.forEach((doc: any) => {
-        list.push(doc.data() as Chat);
-      });
-      list.sort((a, b) => b.updatedAt - a.updatedAt);
-      setChats(list);
-    });
-
-    return () => {
-      unsubBookings();
-      unsubChats();
-    };
-  }, [currentUser, userProfile?.role]);
 
   // Listen to active chat messages
   useEffect(() => {
@@ -231,22 +229,9 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return;
     }
 
-    const msgsQuery = query(
-      collection(db, "chats", activeChatId, "messages"),
-      orderBy("createdAt", "asc")
-    );
-
-    const unsubMsgs = dbOnSnapshot(msgsQuery, (snap) => {
-      const list: Message[] = [];
-      snap.forEach((doc: any) => {
-        list.push(doc.data() as Message);
-      });
-      setMessages(list);
-    }, (err) => {
-      console.warn("Message snap failed, might need indexing or first creation", err);
-    });
-
-    return () => unsubMsgs();
+    const allMessages = JSON.parse(localStorage.getItem("tutorfind_messages") || "{}");
+    const chatMsgs = allMessages[activeChatId] || [];
+    setMessages(chatMsgs);
   }, [activeChatId]);
 
   // Authenticated transactions
@@ -274,13 +259,19 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         city: ""
       };
 
-      await dbSetDoc(doc(db, "users", uid), profile);
-      setUserProfile(profile);
+      saveProfileLocally(uid, profile);
       triggerToast(`Account created as ${role}! 🎉`);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      triggerToast(err instanceof Error ? err.message : "Registration failed.");
-      throw err;
+      if (err.code === "auth/email-already-in-use" || (err.message && err.message.includes("email-already-in-use"))) {
+        const errMsg = "User already exists. Please sign in";
+        triggerToast(errMsg);
+        throw new Error(errMsg);
+      } else {
+        const errMsg = err.message || "Registration failed.";
+        triggerToast(errMsg);
+        throw err;
+      }
     } finally {
       setLoading(false);
     }
@@ -290,15 +281,17 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setLoading(true);
     try {
       const cred = await signInWithEmailAndPassword(auth, email, pass);
-      const profileSnap = await dbGetDoc(doc(db, "users", cred.user.uid));
-      if (profileSnap && profileSnap.exists()) {
-        setUserProfile(profileSnap.data() as UserProfile);
+      const localProfiles = JSON.parse(localStorage.getItem("tutorfind_user_profiles") || "{}");
+      const profile = localProfiles[cred.user.uid];
+      if (profile) {
+        setUserProfile(profile);
       }
       triggerToast("Logged in successfully! 👋");
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      triggerToast(err instanceof Error ? err.message : "Authentication failed.");
-      throw err;
+      const errMsg = "Email or password is incorrect";
+      triggerToast(errMsg);
+      throw new Error(errMsg);
     } finally {
       setLoading(false);
     }
@@ -317,10 +310,10 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const updateProfile = async (updates: Partial<UserProfile>) => {
-    if (!currentUser) return;
+    if (!currentUser || !userProfile) return;
     try {
-      const ref = doc(db, "users", currentUser.uid);
-      await dbUpdateDoc(ref, updates);
+      const updated = { ...userProfile, ...updates };
+      saveProfileLocally(currentUser.uid, updated);
       triggerToast("Profile updated successfully!");
     } catch (err) {
       console.error(err);
@@ -331,11 +324,9 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const addFunding = async (amount: number) => {
     if (!currentUser || !userProfile) return;
     try {
-      const ref = doc(db, "users", currentUser.uid);
       const currentBalance = userProfile.walletBalance || 0;
-      await dbUpdateDoc(ref, {
-        walletBalance: currentBalance + amount
-      });
+      const updated = { ...userProfile, walletBalance: currentBalance + amount };
+      saveProfileLocally(currentUser.uid, updated);
       triggerToast(`Successfully added ₹${amount} to your wallet!`);
     } catch (err) {
       console.error(err);
@@ -350,11 +341,12 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return;
     }
     try {
-      const ref = doc(db, "users", currentUser.uid);
-      await dbUpdateDoc(ref, {
+      const updated = {
+        ...userProfile,
         walletBalance: currentBalance - amount,
         withdrawn: (userProfile.withdrawn || 0) + amount
-      });
+      };
+      saveProfileLocally(currentUser.uid, updated);
       triggerToast(`Withdrawn ₹${amount} successfully! Transfer routed to your Bank.`);
     } catch (err) {
       console.error(err);
@@ -364,7 +356,6 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const bookSession = async (bookingData: Omit<Booking, "id">) => {
     if (!currentUser || !userProfile) return;
     try {
-      // Check if student has sufficient funds
       const fee = bookingData.rate;
       const currentBalance = userProfile.walletBalance || 0;
       if (currentBalance < fee) {
@@ -379,14 +370,16 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         createdAt: new Date().toISOString()
       };
 
-      // Set booking in Firestore
-      await dbSetDoc(doc(db, "bookings", newId), booking);
+      const allBookings = getLocalBookings();
+      allBookings.push(booking);
+      saveLocalBookings(allBookings);
 
-      // Deduct from student wallet instantly to lock the session fee
-      await dbUpdateDoc(doc(db, "users", currentUser.uid), {
+      const updatedStudent = {
+        ...userProfile,
         walletBalance: currentBalance - fee,
         totalSpent: (userProfile.totalSpent || 0) + fee
-      });
+      };
+      saveProfileLocally(currentUser.uid, updatedStudent);
 
       triggerToast("Session requested successfully! 🎉");
     } catch (err) {
@@ -398,38 +391,35 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const updateBookingStatus = async (bookingId: string, status: Booking["status"]) => {
     if (!currentUser || !userProfile) return;
     try {
-      const ref = doc(db, "bookings", bookingId);
-      await dbUpdateDoc(ref, { status });
+      const allBookings = getLocalBookings();
+      const bookingIdx = allBookings.findIndex(b => b.id === bookingId);
+      if (bookingIdx === -1) return;
 
-      // If accepted/confirmed, credit the tutor's wallet
-      const bookingSnap = await dbGetDoc(ref);
-      if (bookingSnap && bookingSnap.exists()) {
-        const booking = bookingSnap.data() as Booking;
-        if (status === "confirmed") {
-          // Tutor gets funded
-          const tutorId = booking.tutorId;
-          const tutorSnap = await dbGetDoc(doc(db, "users", tutorId));
-          if (tutorSnap.exists()) {
-            const tutorData = tutorSnap.data() as UserProfile;
-            await dbUpdateDoc(doc(db, "users", tutorId), {
-              walletBalance: (tutorData.walletBalance || 0) + booking.rate,
-              totalEarned: (tutorData.totalEarned || 0) + booking.rate
-            });
-          }
-          triggerToast("Request accepted, session scheduled!");
-        } else if (status === "cancelled") {
-          // Refund student
-          const studentId = booking.studentId;
-          const studentSnap = await dbGetDoc(doc(db, "users", studentId));
-          if (studentSnap.exists()) {
-            const studentData = studentSnap.data() as UserProfile;
-            await dbUpdateDoc(doc(db, "users", studentId), {
-              walletBalance: (studentData.walletBalance || 0) + booking.rate,
-              totalSpent: Math.max(0, (studentData.totalSpent || 0) - booking.rate)
-            });
-          }
-          triggerToast("Session cancelled and student refunded.");
+      allBookings[bookingIdx].status = status;
+      saveLocalBookings(allBookings);
+
+      const booking = allBookings[bookingIdx];
+
+      if (status === "confirmed") {
+        const tutorId = booking.tutorId;
+        const localProfiles = JSON.parse(localStorage.getItem("tutorfind_user_profiles") || "{}");
+        const tutorData = localProfiles[tutorId];
+        if (tutorData) {
+          tutorData.walletBalance = (tutorData.walletBalance || 0) + booking.rate;
+          tutorData.totalEarned = (tutorData.totalEarned || 0) + booking.rate;
+          saveProfileLocally(tutorId, tutorData);
         }
+        triggerToast("Request accepted, session scheduled!");
+      } else if (status === "cancelled") {
+        const studentId = booking.studentId;
+        const localProfiles = JSON.parse(localStorage.getItem("tutorfind_user_profiles") || "{}");
+        const studentData = localProfiles[studentId];
+        if (studentData) {
+          studentData.walletBalance = (studentData.walletBalance || 0) + booking.rate;
+          studentData.totalSpent = Math.max(0, (studentData.totalSpent || 0) - booking.rate);
+          saveProfileLocally(studentId, studentData);
+        }
+        triggerToast("Session cancelled and student refunded.");
       }
     } catch (err) {
       console.error(err);
@@ -446,17 +436,15 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const roomId = `${studentId}_${resolvedTutorId}`;
 
     try {
-      const chatRef = doc(db, "chats", roomId);
-      const chatSnap = await dbGetDoc(chatRef);
+      const allChats = getLocalChats();
+      let chat = allChats.find(c => c.id === roomId);
 
-      if (!chatSnap.exists()) {
-        const studentSnap = await dbGetDoc(doc(db, "users", studentId));
-        const tutorSnap = await dbGetDoc(doc(db, "users", resolvedTutorId));
+      if (!chat) {
+        const localProfiles = JSON.parse(localStorage.getItem("tutorfind_user_profiles") || "{}");
+        const student = localProfiles[studentId];
+        const tutor = localProfiles[resolvedTutorId];
 
-        const student = studentSnap.data() as UserProfile;
-        const tutor = tutorSnap.data() as UserProfile;
-
-        await dbSetDoc(chatRef, {
+        chat = {
           id: roomId,
           studentId,
           tutorId: resolvedTutorId,
@@ -470,7 +458,9 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           tutorAvatar: tutor?.avatar || "T",
           studentUnread: 0,
           tutorUnread: 0
-        });
+        };
+        allChats.push(chat);
+        saveLocalChats(allChats);
       }
 
       return roomId;
@@ -484,28 +474,35 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (!currentUser || !activeChatId || !userProfile) return;
     const msgId = "msg_" + Date.now();
     try {
-      // Add message document
-      const msgRef = doc(db, "chats", activeChatId, "messages", msgId);
-      await dbSetDoc(msgRef, {
+      const allMsgObj = JSON.parse(localStorage.getItem("tutorfind_messages") || "{}");
+      const chatMsgs = allMsgObj[activeChatId] || [];
+
+      const newMsg: Message = {
         id: msgId,
         senderId: currentUser.uid,
         text,
         time: new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }),
         createdAt: Date.now()
-      });
+      };
+      chatMsgs.push(newMsg);
+      allMsgObj[activeChatId] = chatMsgs;
+      localStorage.setItem("tutorfind_messages", JSON.stringify(allMsgObj));
+      setMessages([...chatMsgs]);
 
       // Update parent chat room
-      const chatRef = doc(db, "chats", activeChatId);
+      const allChats = getLocalChats();
+      const chatIdx = allChats.findIndex(c => c.id === activeChatId);
       const isTutor = userProfile.role === "tutor";
-      await dbUpdateDoc(chatRef, {
-        lastMsg: text,
-        updatedAt: Date.now(),
-        studentUnread: isTutor ? 1 : 0,
-        tutorUnread: isTutor ? 0 : 1
-      });
+      if (chatIdx !== -1) {
+        allChats[chatIdx].lastMsg = text;
+        allChats[chatIdx].updatedAt = Date.now();
+        allChats[chatIdx].studentUnread = isTutor ? 1 : 0;
+        allChats[chatIdx].tutorUnread = isTutor ? 0 : 1;
+        saveLocalChats(allChats);
+      }
 
       // Trigger automatic AI reply safely mimicking natural dialogues
-      setTimeout(async () => {
+      setTimeout(() => {
         try {
           const autoAnswers = [
             "Hello! I saw your request. Let's cover this next class! 👍",
@@ -520,22 +517,32 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           const autoMsgId = "msg_auto_" + Date.now();
           const opposingId = activeChatId.split("_").find(id => id !== currentUser.uid) || "system";
 
-          await dbSetDoc(doc(db, "chats", activeChatId, "messages", autoMsgId), {
+          const freshAllMsgObj = JSON.parse(localStorage.getItem("tutorfind_messages") || "{}");
+          const freshChatMsgs = freshAllMsgObj[activeChatId] || [];
+          const autoMsg: Message = {
             id: autoMsgId,
             senderId: opposingId,
             text: mockAnswer,
             time: new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }),
             createdAt: Date.now()
-          });
+          };
+          freshChatMsgs.push(autoMsg);
+          freshAllMsgObj[activeChatId] = freshChatMsgs;
+          localStorage.setItem("tutorfind_messages", JSON.stringify(freshAllMsgObj));
+          
+          setMessages([...freshChatMsgs]);
 
-          await dbUpdateDoc(chatRef, {
-            lastMsg: mockAnswer,
-            updatedAt: Date.now(),
-            studentUnread: isTutor ? 0 : 1,
-            tutorUnread: isTutor ? 1 : 0
-          });
+          const freshChats = getLocalChats();
+          const freshChatIdx = freshChats.findIndex(c => c.id === activeChatId);
+          if (freshChatIdx !== -1) {
+            freshChats[freshChatIdx].lastMsg = mockAnswer;
+            freshChats[freshChatIdx].updatedAt = Date.now();
+            freshChats[freshChatIdx].studentUnread = isTutor ? 0 : 1;
+            freshChats[freshChatIdx].tutorUnread = isTutor ? 1 : 0;
+            saveLocalChats(freshChats);
+          }
         } catch (autoErr) {
-          console.warn("Auto-reply silent fail (likely normal rule restriction)", autoErr);
+          console.warn("Auto-reply silent fail", autoErr);
         }
       }, 2000);
 

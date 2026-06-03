@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
+import { getAnalytics } from "firebase/analytics";
 import { 
   getFirestore, 
   doc, 
@@ -26,17 +27,17 @@ import {
 export const firebaseConfig = {
   apiKey: "AIzaSyD9M2ak7qNnWVIPma56fgNqyGOcfxoj7vc",
   authDomain: "tutorfind-47171.firebaseapp.com",
-  databaseURL: "https://tutorfind-47171-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "tutorfind-47171",
   storageBucket: "tutorfind-47171.firebasestorage.app",
   messagingSenderId: "525736442683",
-  appId: "1:525736442683:web:cd04e4103bc723613ed51e",
-  measurementId: "G-H54LEL87FZ"
+  appId: "1:525736442683:web:3ce2067d430d3ca53ed51e",
+  measurementId: "G-Q6SMPLCW6Q"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
+export const analytics = typeof window !== "undefined" ? getAnalytics(app) : null;
 export const db = getFirestore(app);
 
 // Operational types for Firestore security mapping
