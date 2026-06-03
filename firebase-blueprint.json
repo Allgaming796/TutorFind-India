@@ -1,0 +1,109 @@
+{
+  "entities": {
+    "Profile": {
+      "title": "UserProfile",
+      "description": "User account schema representing students or tutors",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The user ID matching firebase auth uid" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "city": { "type": "string" },
+        "role": { "type": "string", "enum": ["student", "tutor"] },
+        "subjects": { "type": "array" },
+        "grade": { "type": "string" },
+        "maxFee": { "type": "integer" },
+        "rate": { "type": "integer" },
+        "exp": { "type": "string" },
+        "bio": { "type": "string" },
+        "qual": { "type": "string" },
+        "online": { "type": "boolean" },
+        "avatar": { "type": "string" },
+        "color": { "type": "string" },
+        "rating": { "type": "number" },
+        "reviewsCount": { "type": "integer" },
+        "walletBalance": { "type": "integer" },
+        "totalEarned": { "type": "integer" },
+        "withdrawn": { "type": "integer" },
+        "totalSpent": { "type": "integer" }
+      },
+      "required": ["uid", "name", "email", "role"]
+    },
+    "Booking": {
+      "title": "Booking",
+      "description": "Tutoring session booking reservation",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "studentId": { "type": "string" },
+        "studentName": { "type": "string" },
+        "tutorId": { "type": "string" },
+        "tutorName": { "type": "string" },
+        "tutorAvatar": { "type": "string" },
+        "tutorColor": { "type": "string" },
+        "subject": { "type": "string" },
+        "date": { "type": "string" },
+        "time": { "type": "string" },
+        "mode": { "type": "string", "enum": ["Online", "Offline"] },
+        "status": { "type": "string", "enum": ["pending", "confirmed", "completed", "cancelled"] },
+        "rate": { "type": "integer" },
+        "msg": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "studentId", "tutorId", "subject", "date", "time", "mode", "status", "rate"]
+    },
+    "Chat": {
+      "title": "Chat",
+      "description": "Conversation between a student and a tutor",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "studentId": { "type": "string" },
+        "tutorId": { "type": "string" },
+        "lastMsg": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "studentName": { "type": "string" },
+        "tutorName": { "type": "string" },
+        "studentColor": { "type": "string" },
+        "tutorColor": { "type": "string" },
+        "studentAvatar": { "type": "string" },
+        "tutorAvatar": { "type": "string" },
+        "studentUnread": { "type": "integer" },
+        "tutorUnread": { "type": "integer" }
+      },
+      "required": ["id", "studentId", "tutorId", "lastMsg", "updatedAt"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "A single message in a chat",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "senderId": { "type": "string" },
+        "text": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "time": { "type": "string" }
+      },
+      "required": ["id", "senderId", "text", "createdAt", "time"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "Profile",
+      "description": "Stores student and tutor profile details"
+    },
+    "/bookings/{bookingId}": {
+      "schema": "Booking",
+      "description": "Stores tutoring session bookings and requests"
+    },
+    "/chats/{chatId}": {
+      "schema": "Chat",
+      "description": "Stores conversations metadata"
+    },
+    "/chats/{chatId}/messages/{messageId}": {
+      "schema": "Message",
+      "description": "Stores individual messages inside a conversation chatId"
+    }
+  }
+}

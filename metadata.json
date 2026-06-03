@@ -1,0 +1,6 @@
+{
+  "name": "TutorFind India",
+  "description": "A real-time tutor-matching platform in India with persistent chat, session booking, and student/tutor walllets synchronizing over Firebase.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

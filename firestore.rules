@@ -1,0 +1,126 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global utility primitives
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Validation blueprints for Profile
+    function isValidProfile(data) {
+      return data.keys().hasAll(['uid', 'name', 'email', 'role']) 
+        && data.uid == request.auth.uid
+        && data.name is string && data.name.size() <= 100
+        && data.email is string && data.email.size() <= 150
+        && data.role is string && (data.role == 'student' || data.role == 'tutor')
+        && (!data.keys().hasAny(['phone']) || (data.phone is string && data.phone.size() <= 20))
+        && (!data.keys().hasAny(['city']) || (data.city is string && data.city.size() <= 100))
+        && (!data.keys().hasAny(['grade']) || (data.grade is string && data.grade.size() <= 50))
+        && (!data.keys().hasAny(['bio']) || (data.bio is string && data.bio.size() <= 1000))
+        && (!data.keys().hasAny(['qual']) || (data.qual is string && data.qual.size() <= 200))
+        && (!data.keys().hasAny(['rate']) || (data.rate is int && data.rate >= 0 && data.rate <= 10000))
+        && (!data.keys().hasAny(['maxFee']) || (data.maxFee is int && data.maxFee >= 0 && data.maxFee <= 10000))
+        && (!data.keys().hasAny(['avatar']) || (data.avatar is string && data.avatar.size() <= 10))
+        && (!data.keys().hasAny(['color']) || (data.color is string && data.color.size() <= 10))
+        && (!data.keys().hasAny(['online']) || data.online is bool)
+        && (!data.keys().hasAny(['rating']) || data.rating is number)
+        && (!data.keys().hasAny(['reviewsCount']) || data.reviewsCount is int)
+        && (!data.keys().hasAny(['walletBalance']) || data.walletBalance is int)
+        && (!data.keys().hasAny(['totalEarned']) || data.totalEarned is int)
+        && (!data.keys().hasAny(['withdrawn']) || data.withdrawn is int)
+        && (!data.keys().hasAny(['totalSpent']) || data.totalSpent is int);
+    }
+
+    // Validation blueprints for Bookings
+    function isValidBooking(data) {
+      return data.keys().hasAll(['id', 'studentId', 'studentName', 'tutorId', 'tutorName', 'subject', 'date', 'time', 'mode', 'status', 'rate'])
+        && data.id is string
+        && data.studentId is string
+        && data.studentName is string && data.studentName.size() <= 100
+        && data.tutorId is string
+        && data.tutorName is string && data.tutorName.size() <= 100
+        && data.subject is string && data.subject.size() <= 100
+        && data.date is string && data.date.size() <= 50
+        && data.time is string && data.time.size() <= 50
+        && (data.mode == 'Online' || data.mode == 'Offline')
+        && (data.status == 'pending' || data.status == 'confirmed' || data.status == 'completed' || data.status == 'cancelled')
+        && data.rate is int && data.rate >= 0
+        && (!data.keys().hasAny(['msg']) || (data.msg is string && data.msg.size() <= 500));
+    }
+
+    // Profiles Collection
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isOwner(userId) && isValidProfile(request.resource.data);
+      allow update: if isOwner(userId) && isValidProfile(request.resource.data)
+        && request.resource.data.role == resource.data.role; // Role cannot be mutated
+      allow delete: if false; // Profiles are permanent for safety
+    }
+
+    // Bookings Collection
+    match /bookings/{bookingId} {
+      allow read: if isSignedIn() && (
+        resource.data.studentId == request.auth.uid || 
+        resource.data.tutorId == request.auth.uid
+      );
+      allow create: if isSignedIn() 
+        && request.resource.data.studentId == request.auth.uid
+        && isValidBooking(request.resource.data);
+      allow update: if isSignedIn() && (
+        // Only student or tutor engaged can update
+        resource.data.studentId == request.auth.uid || 
+        resource.data.tutorId == request.auth.uid
+      ) && isValidBooking(request.resource.data)
+      && request.resource.data.studentId == resource.data.studentId // Immortals
+      && request.resource.data.tutorId == resource.data.tutorId
+      && request.resource.data.rate == resource.data.rate;
+      allow delete: if false;
+    }
+
+    // Chats Collection
+    match /chats/{chatId} {
+      allow read: if isSignedIn() && (
+        resource.data.studentId == request.auth.uid || 
+        resource.data.tutorId == request.auth.uid
+      );
+      allow create: if isSignedIn() && (
+        request.resource.data.studentId == request.auth.uid || 
+        request.resource.data.tutorId == request.auth.uid
+      ) && request.resource.data.keys().hasAll(['id', 'studentId', 'tutorId', 'lastMsg', 'updatedAt']);
+      allow update: if isSignedIn() && (
+        resource.data.studentId == request.auth.uid || 
+        resource.data.tutorId == request.auth.uid
+      ) && request.resource.data.id == resource.data.id;
+      allow delete: if false;
+
+      // Messages Subcollection
+      match /messages/{messageId} {
+        allow read: if isSignedIn() && (
+          get(/databases/$(database)/documents/chats/$(chatId)).data.studentId == request.auth.uid ||
+          get(/databases/$(database)/documents/chats/$(chatId)).data.tutorId == request.auth.uid
+        );
+        allow create: if isSignedIn() && (
+          get(/databases/$(database)/documents/chats/$(chatId)).data.studentId == request.auth.uid ||
+          get(/databases/$(database)/documents/chats/$(chatId)).data.tutorId == request.auth.uid
+        ) && request.resource.data.senderId == request.auth.uid
+          && request.resource.data.keys().hasAll(['id', 'senderId', 'text', 'time'])
+          && request.resource.data.text is string && request.resource.data.text.size() <= 2000;
+        allow update, delete: if false; // Chats are immutable
+      }
+    }
+  }
+}
