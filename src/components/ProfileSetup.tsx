@@ -85,7 +85,7 @@ export const ProfileSetup: React.FC = () => {
         bio,
         online: true,
         avatar: userProfile?.name?.split(" ").filter(Boolean).map(w => w[0]).join("").toUpperCase().slice(0, 2) || "T",
-        color: userProfile?.color || "#4f46e5"
+        color: "#000000"
       });
     } else {
       await updateProfile({
@@ -95,29 +95,29 @@ export const ProfileSetup: React.FC = () => {
         maxFee: Number(maxFee),
         online: true,
         avatar: userProfile?.name?.split(" ").filter(Boolean).map(w => w[0]).join("").toUpperCase().slice(0, 2) || "S",
-        color: userProfile?.color || "#10b981"
+        color: "#000000"
       });
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 py-12 px-4 flex justify-center items-center">
+    <div className="min-h-screen bg-neutral-100 py-12 px-4 flex justify-center items-center">
       <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.3 }}
-        className="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl relative"
+        className="w-full max-w-2xl bg-white border-2 border-black rounded-xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative"
       >
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-3 bg-indigo-600/10 text-indigo-400 rounded-2xl border border-indigo-500/20">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-8 pb-6 border-b-2 border-neutral-100">
+          <div className="p-3 bg-black text-white rounded-lg border-2 border-black w-fit">
             <BookOpen size={24} />
           </div>
           <div>
-            <h1 className="text-xl font-bold font-display text-white">Complete Your Profile</h1>
-            <p className="text-xs text-slate-400">Takes less than 1 minute to list you correctly</p>
+            <h1 className="text-2xl font-bold font-display text-black uppercase tracking-tight">Complete Your Profile</h1>
+            <p className="text-xs text-neutral-500">Ensure details are accurate for high matching potential</p>
           </div>
-          <span className="ml-auto text-[10px] font-bold font-mono tracking-wider text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 py-1 px-2.5 rounded-full uppercase">
-            {isTutor ? "Tutor Setup" : "Student Setup"}
+          <span className="sm:ml-auto text-[10px] font-bold font-mono tracking-wider text-black bg-neutral-100 border-2 border-black py-1 px-3 rounded-full uppercase">
+            {isTutor ? "Tutor Profile Setup" : "Student Setup"}
           </span>
         </div>
 
@@ -125,8 +125,8 @@ export const ProfileSetup: React.FC = () => {
           
           {/* CITY AUTOCOMPLETE */}
           <div className="space-y-2 relative">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono flex items-center gap-1">
-              <MapPin size={14} className="text-slate-500" />
+            <label className="text-xs font-bold text-black uppercase tracking-wider font-mono flex items-center gap-1.5">
+              <MapPin size={14} className="text-black" />
               Your City / Region *
             </label>
             <input
@@ -134,17 +134,17 @@ export const ProfileSetup: React.FC = () => {
               placeholder="e.g. Hyderabad, Kanpur, Delhi..."
               value={cityQuery}
               onChange={(e) => handleCityInput(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl text-slate-200 text-sm focus:outline-none transition-all"
+              className="w-full px-4 py-2.5 bg-white border-2 border-black focus:bg-neutral-50 rounded-lg text-black text-sm focus:outline-none transition-all"
               required
             />
             {cityMatches.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-slate-950 border border-slate-850 rounded-xl overflow-hidden z-50 shadow-2xl">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white border-2 border-black rounded-lg overflow-hidden z-50 shadow-md">
                 {cityMatches.map((c, idx) => (
                   <button
                     key={idx}
                     type="button"
                     onClick={() => selectCity(c)}
-                    className="w-full text-left py-2.5 px-4 text-slate-300 text-xs hover:bg-indigo-600 hover:text-white transition-all border-b border-slate-900 last:border-0"
+                    className="w-full text-left py-2 px-4 text-black text-sm hover:bg-black hover:text-white transition-all border-b border-neutral-100 last:border-0"
                   >
                     📍 {c}
                   </button>
@@ -152,19 +152,19 @@ export const ProfileSetup: React.FC = () => {
               </div>
             )}
             {city && (
-              <p className="text-[11px] text-emerald-400 flex items-center gap-1 font-sans">
-                <CheckCircle2 size={12} /> Registered in: <strong>{city}</strong>
+              <p className="text-[11px] text-black font-semibold flex items-center gap-1 font-sans">
+                <CheckCircle2 size={12} /> Registered City: <strong>{city}</strong>
               </p>
             )}
           </div>
 
           {/* SUBJECTS MULTISELECT */}
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono flex items-center gap-1">
-              <BookOpen size={14} className="text-slate-500" />
-              {isTutor ? "Subjects You Teach *" : "Subjects You Need Help With *"}
+            <label className="text-xs font-bold text-black uppercase tracking-wider font-mono flex items-center gap-1.5">
+              <BookOpen size={14} className="text-black" />
+              {isTutor ? "Subjects You Teach *" : "Subjects You Seek Help With *"}
             </label>
-            <p className="text-[10px] text-slate-500 font-sans">Choose all that apply</p>
+            <p className="text-[10px] text-neutral-500 font-sans">Select all matching subjects</p>
             <div className="flex flex-wrap gap-2 pt-1">
               {SUBJECTS.map((s, idx) => {
                 const active = selectedSubjects.includes(s);
@@ -173,10 +173,10 @@ export const ProfileSetup: React.FC = () => {
                     key={idx}
                     type="button"
                     onClick={() => toggleSubject(s)}
-                    className={`py-1.5 px-3.5 rounded-full text-xs font-medium cursor-pointer transition-all border ${
+                    className={`py-1.5 px-3 rounded-md text-xs font-bold cursor-pointer transition-all border-2 ${
                       active 
-                        ? "border-indigo-500 bg-indigo-500/15 text-indigo-300 font-bold" 
-                        : "border-slate-800 bg-slate-950 text-slate-400 hover:border-slate-705"
+                        ? "border-black bg-black text-white" 
+                        : "border-neutral-200 bg-white text-neutral-600 hover:border-black hover:text-black"
                     }`}
                   >
                     {s}
@@ -187,10 +187,10 @@ export const ProfileSetup: React.FC = () => {
           </div>
 
           {/* GRADE SELECT */}
-          <div className="space-y-4">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono flex items-center gap-1">
-              <Layers size={14} className="text-slate-500" />
-              {isTutor ? "Grades / Levels You Teach *" : "Your Academic Level *"}
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-black uppercase tracking-wider font-mono flex items-center gap-1.5">
+              <Layers size={14} className="text-black" />
+              {isTutor ? "Grades / Levels You Teach *" : "Your Grade / Placement Level *"}
             </label>
             <div className="flex flex-wrap gap-2 pt-1">
               {GRADES.map((g, idx) => {
@@ -200,10 +200,10 @@ export const ProfileSetup: React.FC = () => {
                     key={idx}
                     type="button"
                     onClick={() => setSelectedGrade(g)}
-                    className={`py-1.5 px-3.5 rounded-full text-xs font-medium cursor-pointer transition-all border ${
+                    className={`py-1.5 px-3 rounded-md text-xs font-bold cursor-pointer transition-all border-2 ${
                       active 
-                        ? "border-indigo-500 bg-indigo-500/15 text-indigo-300 font-bold" 
-                        : "border-slate-800 bg-slate-950 text-slate-400 hover:border-slate-705"
+                        ? "border-black bg-black text-white" 
+                        : "border-neutral-200 bg-white text-neutral-600 hover:border-black hover:text-black"
                     }`}
                   >
                     {g}
@@ -215,47 +215,47 @@ export const ProfileSetup: React.FC = () => {
 
           {isTutor ? (
             /* TUTOR SPECIFIC FIELD BLOCK */
-            <div className="space-y-4 border-t border-slate-800/60 pt-6">
+            <div className="space-y-4 border-t-2 border-neutral-100 pt-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono flex items-center gap-1">
-                    <IndianRupee size={14} className="text-slate-500" />
-                    Session Fee (₹) *
+                  <label className="text-xs font-bold text-black uppercase tracking-wider font-mono flex items-center gap-1.5">
+                    <IndianRupee size={14} className="text-black" />
+                    Session Rate (₹ / Class) *
                   </label>
                   <input
                     type="tel"
                     placeholder="e.g. 400"
                     value={fee}
                     onChange={(e) => setFee(e.target.value.replace(/[^0-9]/g, ""))}
-                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl text-slate-200 text-sm focus:outline-none transition-all"
+                    className="w-full px-4 py-2 bg-white border-2 border-black rounded-lg text-black text-sm focus:outline-none focus:bg-neutral-50 transition-all font-mono"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono flex items-center gap-1">
-                    <Briefcase size={14} className="text-slate-500" />
-                    Teaching Experience *
+                  <label className="text-xs font-bold text-black uppercase tracking-wider font-mono flex items-center gap-1.5">
+                    <Briefcase size={14} className="text-black" />
+                    Teaching Background *
                   </label>
                   <select
                     value={exp}
                     onChange={(e) => setExp(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl text-slate-300 text-sm focus:outline-none transition-all"
+                    className="w-full px-4 py-2 bg-white border-2 border-black rounded-lg text-black text-sm focus:outline-none focus:bg-neutral-50 transition-all appearance-none"
                     required
                   >
-                    <option value="">Choose experience...</option>
-                    <option value="<1 year">less than 1 Year</option>
+                    <option value="">Select experience level...</option>
+                    <option value="<1 year">Below 1 Year</option>
                     <option value="1-3 years">1 - 3 Years</option>
                     <option value="4-6 years">4 - 6 Years</option>
                     <option value="7-9 years">7 - 9 Years</option>
-                    <option value="10+ years">10+ Years Expert</option>
+                    <option value="10+ years">10+ Years (Senior)</option>
                   </select>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono flex items-center gap-1">
-                  <Award size={14} className="text-slate-500" />
-                  Educator Mode
+                <label className="text-xs font-bold text-black uppercase tracking-wider font-mono flex items-center gap-1.5">
+                  <Award size={14} className="text-black" />
+                  Educator Session Mode
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   {MODES.map((m, idx) => (
@@ -263,10 +263,10 @@ export const ProfileSetup: React.FC = () => {
                       key={idx}
                       type="button"
                       onClick={() => setMode(m as any)}
-                      className={`py-2 text-xs font-semibold rounded-lg transition-all ${
+                      className={`py-2 text-xs font-bold rounded transition-all border-2 ${
                         mode === m 
-                          ? "bg-slate-100 text-slate-950 font-bold" 
-                          : "bg-slate-950 text-slate-400 hover:text-white"
+                          ? "bg-black text-white border-black" 
+                          : "bg-white text-black border-neutral-200 hover:border-black"
                       }`}
                     >
                       {m}
@@ -276,62 +276,76 @@ export const ProfileSetup: React.FC = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono flex items-center gap-1">
-                  Qualification / Degrees
+                <label className="text-xs font-bold text-black uppercase tracking-wider font-mono">
+                  Qualification / Focus Degrees
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. BTech IIT Kanpur, MA English Lit"
+                  placeholder="e.g. BTech IIT Kanpur, MA English Literature"
                   value={qual}
                   onChange={(e) => setQual(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl text-slate-200 text-sm focus:outline-none transition-all"
+                  className="w-full px-4 py-2 bg-white border-2 border-black rounded-lg text-black text-sm focus:outline-none focus:bg-neutral-50 transition-all font-sans"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono flex items-center gap-1">
-                  About You / Quick Intro Bio
+                <label className="text-xs font-bold text-black uppercase tracking-wider font-mono">
+                  Your Biography / Description
                 </label>
                 <textarea
                   rows={3}
-                  placeholder="Tell students about your style of explaining concepts..."
+                  placeholder="Introduce yourself to the students..."
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl text-slate-200 text-sm focus:outline-none transition-all resize-none font-sans"
+                  className="w-full px-4 py-2 bg-white border-2 border-black rounded-lg text-black text-sm focus:outline-none focus:bg-neutral-50 transition-all resize-none font-sans"
                 />
               </div>
             </div>
           ) : (
             /* STUDENT SPECIFIC FIELD BLOCK */
-            <div className="space-y-4 border-t border-slate-800/60 pt-6">
+            <div className="space-y-4 border-t-2 border-neutral-100 pt-6">
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono flex items-center gap-1">
-                  <IndianRupee size={14} className="text-slate-500" />
-                  Your Maximum Fee Budget (₹ per Class)
+                <label className="text-xs font-bold text-black uppercase tracking-wider font-mono flex items-center gap-1.5">
+                  <IndianRupee size={14} className="text-black" />
+                  Max Hourly/Session Budget (₹)
                 </label>
                 <div className="flex items-center gap-4">
                   <input
                     type="range"
                     min="100"
-                    max="1000"
+                    max="2000"
                     step="50"
-                    value={maxFee}
+                    value={Number(maxFee) || 100}
                     onChange={(e) => setMaxFee(e.target.value)}
-                    className="flex-1 accent-indigo-500 cursor-pointer h-1.5 bg-slate-950 rounded-lg"
+                    className="flex-1 accent-black cursor-pointer h-2 bg-neutral-200 rounded-lg appearance-none"
                   />
-                  <div className="w-24 text-center py-2 bg-slate-950 rounded-xl font-bold border border-slate-800 text-white">
-                    ₹{maxFee}
+                  <div className="relative flex items-center">
+                    <span className="absolute left-3.5 text-xs text-neutral-500 font-bold font-mono">₹</span>
+                    <input
+                      type="text"
+                      pattern="[0-9]*"
+                      value={maxFee}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/[^0-9]/g, "");
+                        setMaxFee(val);
+                      }}
+                      placeholder="e.g. 500"
+                      className="w-28 text-center pl-7 pr-3 py-2 bg-white border-2 border-black rounded-lg font-bold text-xs font-mono focus:outline-none focus:bg-neutral-50"
+                    />
                   </div>
                 </div>
+                <p className="text-[10px] text-neutral-500 font-sans italic">
+                  Drag the slider or write your budget directly in the text box above!
+                </p>
               </div>
             </div>
           )}
 
           <button
             type="submit"
-            className="w-full py-3.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white font-bold text-sm rounded-xl cursor-pointer shadow-lg shadow-indigo-600/20 active:scale-[0.99] transition-all"
+            className="w-full py-3.5 bg-black hover:bg-neutral-900 border-2 border-black text-white font-bold font-display uppercase tracking-widest text-xs rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all cursor-pointer"
           >
-            Publish Profile Live ✨
+            Publish Profile Live
           </button>
         </form>
       </motion.div>

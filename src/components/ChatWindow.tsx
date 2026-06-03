@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useFirebase } from "../FirebaseContext";
 import { ArrowLeft, Send, ShieldAlert } from "lucide-react";
-import { motion } from "motion/react";
 
 interface ChatWindowProps {
   onBack: () => void;
@@ -38,10 +37,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ onBack }) => {
 
   if (!activeChat || !currentUser) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4">
-        <ShieldAlert size={36} className="text-red-500 mb-2" />
-        <h3 className="font-bold text-white font-display">Conversation room not found</h3>
-        <button onClick={onBack} className="mt-4 px-4 py-2 bg-indigo-600 rounded-xl text-xs font-bold text-white">
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
+        <ShieldAlert size={36} className="text-black mb-2" />
+        <h3 className="font-bold text-black font-display uppercase tracking-widest">Conversation not found</h3>
+        <button onClick={onBack} className="mt-4 px-4 py-2 bg-black text-white rounded border-2 border-black text-xs font-bold uppercase tracking-wider font-display">
           Return Home
         </button>
       </div>
@@ -51,41 +50,39 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ onBack }) => {
   const isTutor = userProfile?.role === "tutor";
   const peerName = isTutor ? activeChat.studentName : activeChat.tutorName;
   const peerAvatar = isTutor ? activeChat.studentAvatar : activeChat.tutorAvatar;
-  const peerColor = isTutor ? activeChat.studentColor : activeChat.tutorColor;
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col font-sans text-black">
       {/* CHAT HEADER */}
-      <header className="sticky top-0 bg-slate-900 border-b border-slate-800 z-40 px-4 py-3 flex items-center gap-3">
+      <header className="sticky top-0 bg-white border-b-2 border-black z-40 px-4 py-3 flex items-center gap-3">
         <button 
           onClick={onBack}
-          className="p-1 px-2.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-all cursor-pointer"
+          className="p-1 px-2 border-2 border-black rounded hover:bg-neutral-100 text-black transition-all cursor-pointer"
         >
           <ArrowLeft size={16} />
         </button>
 
         <div 
-          className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white uppercase shadow"
-          style={{ backgroundColor: peerColor || "#4f46e5" }}
+          className="w-10 h-10 rounded-full border-2 border-black bg-black text-white flex items-center justify-center font-bold uppercase shadow-sm"
         >
           {peerAvatar || "P"}
         </div>
 
         <div>
-          <h2 className="text-sm font-bold text-white font-display leading-tight">{peerName}</h2>
-          <span className="text-[9px] text-slate-500 leading-none">Real-Time persistent Dialogue</span>
+          <h2 className="text-sm font-bold text-black font-display uppercase tracking-wider leading-tight">{peerName}</h2>
+          <span className="text-[9px] text-neutral-500 font-mono font-bold leading-none">Persistent Dialogue Sync</span>
         </div>
       </header>
 
       {/* MESSAGES BODY */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 flex flex-col justify-end min-h-0 bg-slate-950/60 no-scrollbar">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 flex flex-col justify-end min-h-0 bg-white no-scrollbar">
         {messages.length === 0 ? (
-          <div className="my-auto py-12 text-center text-slate-600 text-xs italic space-y-1 font-sans">
-            <p>No message logs yet.</p>
-            <p className="text-[10px]">Type a greeting to start real-time sync with {peerName}!</p>
+          <div className="my-auto py-12 text-center text-neutral-400 text-xs italic space-y-1 font-sans">
+            <p>No messages logs.</p>
+            <p className="text-[10px] font-mono not-italic font-bold text-black uppercase">Start a dialog with {peerName}!</p>
           </div>
         ) : (
-          <div className="space-y-3.5 overflow-y-auto no-scrollbar">
+          <div className="space-y-4 overflow-y-auto no-scrollbar">
             {messages.map((m) => {
               const mine = m.senderId === currentUser.uid;
               return (
@@ -95,22 +92,21 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ onBack }) => {
                 >
                   {!mine && (
                     <div 
-                      className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-white uppercase"
-                      style={{ backgroundColor: peerColor || "#4f46e5" }}
+                      className="w-7 h-7 rounded-full border border-black bg-neutral-100 flex items-center justify-center text-[10px] font-bold text-black uppercase"
                     >
                       {peerAvatar || "P"}
                     </div>
                   )}
 
                   <div className="max-w-[70%] space-y-1">
-                    <div className={`p-3 rounded-2xl text-xs leading-relaxed font-sans shadow-md border ${
+                    <div className={`p-3 rounded-lg text-xs leading-relaxed font-sans shadow-sm border-2 ${
                       mine 
-                        ? "bg-indigo-600 hover:bg-indigo-500 text-white rounded-br-none border-indigo-500" 
-                        : "bg-slate-900 text-slate-200 rounded-bl-none border-slate-850"
+                        ? "bg-black text-white rounded-br-none border-black" 
+                        : "bg-white text-black rounded-bl-none border-black border-dashed"
                     }`}>
                       {m.text}
                     </div>
-                    <span className={`block text-[8px] font-mono text-slate-500 ${mine ? "text-right" : "text-left"}`}>
+                    <span className={`block text-[8px] font-mono font-bold text-neutral-500 ${mine ? "text-right" : "text-left"}`}>
                       {m.time}
                     </span>
                   </div>
@@ -123,17 +119,17 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ onBack }) => {
       </div>
 
       {/* CHAT INPUT FORM */}
-      <form onSubmit={handleSend} className="bg-slate-900 border-t border-slate-800 p-3 flex gap-2 items-center">
+      <form onSubmit={handleSend} className="bg-white border-t-2 border-black p-3 flex gap-2 items-center">
         <input
           type="text"
-          placeholder={`Leave a message for ${peerName}...`}
+          placeholder={`Inquire to ${peerName}...`}
           value={text}
           onChange={(e) => setText(e.target.value)}
-          className="flex-1 px-4 py-2.5 bg-slate-950 border border-slate-850 rounded-full text-slate-200 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
+          className="flex-1 px-4 py-2.5 bg-white border-2 border-black rounded-lg text-black font-semibold text-xs focus:outline-none focus:bg-neutral-50 font-sans"
         />
         <button
           type="submit"
-          className="p-3 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white rounded-full flex items-center justify-center shadow-lg shadow-indigo-600/20 cursor-pointer"
+          className="p-3 bg-black hover:bg-neutral-900 border-2 border-black text-white rounded-lg flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none cursor-pointer"
         >
           <Send size={14} />
         </button>

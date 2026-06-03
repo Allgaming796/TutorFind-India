@@ -1,7 +1,7 @@
 import React from "react";
 import { useFirebase } from "../FirebaseContext";
 import { INITIAL_TUTORS_DATA } from "../constants";
-import { ArrowLeft, MessageSquare, Calendar, Star, MapPin, Award, BookOpen, Layers } from "lucide-react";
+import { ArrowLeft, MessageSquare, Calendar, Star, MapPin, Award, BookOpen } from "lucide-react";
 import { motion } from "motion/react";
 
 interface TutorProfileDetailProps {
@@ -19,9 +19,9 @@ export const TutorProfileDetail: React.FC<TutorProfileDetailProps> = ({ tutorInd
 
   if (!tutorData) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4">
-        <h3 className="font-bold text-white font-display">Tutor Profile Not Found</h3>
-        <button onClick={onBack} className="mt-4 px-4 py-2 bg-indigo-600 rounded-xl text-xs font-bold text-white">
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
+        <h3 className="font-bold text-black font-display uppercase tracking-widest">Tutor Profile Not Found</h3>
+        <button onClick={onBack} className="mt-4 px-4 py-2 bg-black text-white rounded-lg border-2 border-black text-xs font-bold font-display uppercase tracking-wider">
           Return Home
         </button>
       </div>
@@ -32,94 +32,91 @@ export const TutorProfileDetail: React.FC<TutorProfileDetailProps> = ({ tutorInd
   const reviews = refStatic.refReviews || [];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-white text-black flex flex-col font-sans">
       {/* HEADER BAR */}
-      <header className="sticky top-0 bg-slate-900 border-b border-slate-800 z-40 px-4 py-3 flex items-center gap-3">
+      <header className="sticky top-0 bg-white border-b-2 border-black z-40 px-4 py-3 flex items-center gap-3">
         <button 
           onClick={onBack}
-          className="p-1 px-2.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-all cursor-pointer"
+          className="p-1 px-2 border-2 border-black rounded hover:bg-neutral-100 text-black transition-all cursor-pointer"
         >
           <ArrowLeft size={16} />
         </button>
-        <span className="font-bold text-white font-display text-sm">Review Credentials</span>
+        <span className="font-bold text-black font-display text-sm uppercase tracking-wider">Review Credentials</span>
       </header>
 
       {/* BODY PANEL */}
-      <div className="flex-1 max-w-2xl w-full mx-auto p-4 space-y-6 pb-24">
+      <div className="flex-1 max-w-2xl w-full mx-auto p-4 space-y-6 pb-28">
         
         {/* HERO SECTION */}
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 relative overflow-hidden flex flex-col md:flex-row items-center md:items-start gap-5 shadow-xl">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-2xl" />
-
+        <div className="bg-white border-2 border-black rounded-lg p-6 flex flex-col md:flex-row items-center md:items-start gap-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden">
           <div 
-            className="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold text-white uppercase shadow-lg flex-shrink-0 border-2 border-slate-800 relative"
-            style={{ backgroundColor: tutorData.color || "#4f46e5" }}
+            className="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold text-white bg-black uppercase shadow flex-shrink-0 border-2 border-black relative"
           >
             {tutorData.avatar || tutorData.name.slice(0, 2)}
             {tutorData.online && (
-              <span className="absolute bottom-1 right-1 w-4.5 h-4.5 bg-emerald-500 border-2 border-slate-900 rounded-full" />
+              <span className="absolute bottom-1 right-1 w-4.5 h-4.5 bg-neutral-900 border-2 border-white rounded-full" />
             )}
           </div>
 
-          <div className="flex-1 text-center md:text-left space-y-1.5 min-w-0">
-            <h1 className="text-xl font-bold text-white font-display tracking-tight flex flex-col md:flex-row md:items-center gap-2">
+          <div className="flex-1 text-center md:text-left space-y-2 min-w-0">
+            <h1 className="text-xl font-bold text-black font-display tracking-tight flex flex-col md:flex-row md:items-center gap-2 uppercase">
               {tutorData.name}
               {tutorData.qual && (
-                <span className="text-[10px] bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded-full uppercase tracking-wider font-mono mx-auto md:mx-0 w-max font-bold">
+                <span className="text-[10px] bg-neutral-100 text-black border-2 border-black px-2 py-0.5 rounded-full uppercase tracking-wider font-mono mx-auto md:mx-0 w-max font-bold">
                   {tutorData.qual}
                 </span>
               )}
             </h1>
 
-            <p className="text-xs text-slate-400 font-sans flex items-center justify-center md:justify-start gap-1">
-              <MapPin size={12} className="text-indigo-400" />
-              Resident of <strong>{tutorData.city}</strong> &nbsp;·&nbsp; {tutorData.exp} experience
+            <p className="text-xs text-neutral-600 font-semibold flex items-center justify-center md:justify-start gap-1 font-mono">
+              <MapPin size={12} className="text-black" />
+              Resident of <strong>{tutorData.city}</strong> &nbsp;·&nbsp; {tutorData.exp} Exp
             </p>
 
-            <div className="flex items-center justify-center md:justify-start gap-1.5 text-sm font-bold pt-1 text-amber-400">
-              <Star size={14} fill="currentColor" />
+            <div className="flex items-center justify-center md:justify-start gap-1.5 text-sm font-bold pt-1 text-black">
+              <Star size={14} fill="currentColor" className="text-black" />
               <span>{tutorData.rating || "5.0"} rating</span>
-              <span className="text-slate-500 font-normal font-sans text-xs">({tutorData.reviewsCount || 0} classes structured)</span>
+              <span className="text-neutral-500 font-normal font-sans text-xs">({tutorData.reviewsCount || 0} classes structured)</span>
             </div>
           </div>
 
-          <div className="bg-slate-950 px-4 py-3 rounded-2xl border border-slate-850 text-center w-full md:w-auto flex-shrink-0 font-display">
-            <span className="text-[9px] font-bold text-slate-500 tracking-wider uppercase font-mono block">SESSION CHARGE</span>
-            <div className="text-2xl font-bold text-white mt-1 font-mono">₹{tutorData.rate}/class</div>
+          <div className="bg-neutral-50 px-4 py-3 rounded-lg border-2 border-black text-center w-full md:w-auto flex-shrink-0 font-display">
+            <span className="text-[9px] font-extrabold text-neutral-500 tracking-wider uppercase font-mono block">SESSION CHARGE</span>
+            <div className="text-2xl font-bold text-black mt-1 font-mono">₹{tutorData.rate}/class</div>
           </div>
         </div>
 
         {/* DETAILS BIOGRAPHY */}
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-3">
-          <div className="flex items-center gap-1.5 text-slate-400">
-            <Award size={14} className="text-indigo-400" />
+        <div className="bg-white border-2 border-black rounded-lg p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] space-y-3">
+          <div className="flex items-center gap-1.5 text-black">
+            <Award size={14} className="text-black" />
             <h3 className="text-xs font-bold tracking-wider font-mono uppercase">Biography Statement</h3>
           </div>
-          <p className="text-xs text-slate-300 font-sans leading-relaxed">
+          <p className="text-xs text-neutral-700 font-sans leading-relaxed">
             {tutorData.bio || "Certified educator listed transparently with TutorFind credentials."}
           </p>
         </div>
 
         {/* TARGET CLASSIFICATIONS */}
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
-          <div className="flex items-center gap-1.5 text-slate-400">
-            <BookOpen size={14} className="text-indigo-400" />
+        <div className="bg-white border-2 border-black rounded-lg p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] space-y-4">
+          <div className="flex items-center gap-1.5 text-black">
+            <BookOpen size={14} className="text-black" />
             <h3 className="text-xs font-bold tracking-wider font-mono uppercase">Subjects &amp; Grade Reach</h3>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-4 font-sans text-xs">
             <div>
-              <span className="block text-[9px] font-bold text-slate-500 tracking-wider uppercase font-mono mb-2">TARGET CLASSES</span>
-              <span className="text-xs font-bold bg-slate-950 py-1.5 px-3 rounded-lg border border-slate-850 text-slate-300">
+              <span className="block text-[9px] font-bold text-neutral-500 tracking-wider uppercase font-mono mb-2">TARGET CLASSES</span>
+              <span className="text-xs font-bold bg-neutral-100 py-1.5 px-3 rounded-md border-2 border-black text-black">
                 {tutorData.grade || "All Grades"}
               </span>
             </div>
 
             <div>
-              <span className="block text-[9px] font-bold text-slate-500 tracking-wider uppercase font-mono mb-2">EDUCATIONAL TOPICS</span>
+              <span className="block text-[9px] font-bold text-neutral-500 tracking-wider uppercase font-mono mb-2">EDUCATIONAL TOPICS</span>
               <div className="flex flex-wrap gap-1.5">
                 {(tutorData.subjects || []).map((sub, i) => (
-                  <span key={i} className="text-xs bg-slate-950 text-slate-400 py-1 px-3 rounded-full font-mono border border-slate-850">
+                  <span key={i} className="text-xs bg-neutral-100 text-black py-1 px-3 rounded font-mono border-2 border-neutral-300">
                     {sub}
                   </span>
                 ))}
@@ -127,8 +124,8 @@ export const TutorProfileDetail: React.FC<TutorProfileDetailProps> = ({ tutorInd
             </div>
             
             <div className="pt-2">
-              <span className="block text-[9px] font-bold text-slate-500 tracking-wider uppercase font-mono mb-2">TEACHING MODE</span>
-              <span className="text-xs font-bold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 py-1 px-3.5 rounded-full uppercase tracking-wider font-mono">
+              <span className="block text-[9px] font-bold text-neutral-500 tracking-wider uppercase font-mono mb-2">TEACHING MODE</span>
+              <span className="text-xs font-bold bg-black text-white border-2 border-black py-1 px-3.5 rounded font-mono uppercase">
                 🌐 {tutorData.mode} Class Available
               </span>
             </div>
@@ -136,28 +133,28 @@ export const TutorProfileDetail: React.FC<TutorProfileDetailProps> = ({ tutorInd
         </div>
 
         {/* FEEDBACK LIST */}
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
-          <div className="flex items-center gap-1.5 text-slate-400">
-            <Star size={14} className="text-indigo-400" />
+        <div className="bg-white border-2 border-black rounded-lg p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] space-y-4">
+          <div className="flex items-center gap-1.5 text-black">
+            <Star size={14} className="text-black" />
             <h3 className="text-xs font-bold tracking-wider font-mono uppercase">Student Endorsements ({reviews.length})</h3>
           </div>
 
-          <div className="space-y-3 divide-y divide-slate-800/60">
+          <div className="space-y-4 divide-y-2 divide-neutral-100">
             {reviews.length === 0 ? (
-              <p className="text-xs italic text-slate-500">No review statements compiled yet.</p>
+              <p className="text-xs italic text-neutral-500 font-sans">No review statements compiled yet.</p>
             ) : (
               reviews.map((rev, i) => (
-                <div key={i} className={`pt-3 first:pt-0 space-y-1.5 font-sans`}>
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="font-bold text-white leading-none">{rev.name}</span>
-                    <span className="text-[10px] font-mono text-slate-500">{rev.date}</span>
+                <div key={i} className={`pt-4 first:pt-0 space-y-1.5 font-sans`}>
+                  <div className="flex justify-between items-center text-xs font-semibold">
+                    <span className="font-bold text-black leading-none">{rev.name}</span>
+                    <span className="text-[10px] font-mono text-neutral-500 font-bold">{rev.date}</span>
                   </div>
-                  <div className="flex text-amber-400 gap-0.5 text-[10px]">
+                  <div className="flex text-black gap-0.5 text-[10px]">
                     {Array.from({ length: rev.rating }).map((_, rIdx) => (
                       <Star key={rIdx} size={10} fill="currentColor" />
                     ))}
                   </div>
-                  <p className="text-slate-400 text-xs leading-relaxed italic">
+                  <p className="text-neutral-600 text-xs leading-relaxed italic">
                     "{rev.text}"
                   </p>
                 </div>
@@ -169,7 +166,7 @@ export const TutorProfileDetail: React.FC<TutorProfileDetailProps> = ({ tutorInd
       </div>
 
       {/* NAV FOOTER CTAS */}
-      <footer className="fixed bottom-0 left-0 right-0 py-3 bg-slate-900 border-t border-slate-800 px-4 z-40">
+      <footer className="fixed bottom-0 left-0 right-0 py-3 bg-white border-t-2 border-black px-4 z-40">
         <div className="max-w-2xl mx-auto flex gap-3">
           <button
             onClick={async () => {
@@ -178,17 +175,17 @@ export const TutorProfileDetail: React.FC<TutorProfileDetailProps> = ({ tutorInd
               // Trigger return to student dashboard chats tab trigger
               onBack();
             }}
-            className="flex-1 py-3 bg-slate-950 hover:bg-slate-900 text-slate-300 font-bold border border-slate-800 rounded-2xl cursor-pointer text-xs flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
+            className="flex-1 py-3 bg-white hover:bg-neutral-50 text-black font-bold border-2 border-black rounded-lg cursor-pointer text-xs flex items-center justify-center gap-2 active:translate-y-[1px] transition-all uppercase tracking-wide font-display"
           >
             <MessageSquare size={14} />
             Chat Instant
           </button>
           <button
             onClick={onBook}
-            className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl cursor-pointer text-xs flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-lg shadow-indigo-600/15"
+            className="flex-1 py-3 bg-black hover:bg-neutral-900 border-2 border-black text-white font-bold rounded-lg cursor-pointer text-xs flex items-center justify-center gap-2 active:translate-y-[1px] transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] uppercase tracking-wide font-display"
           >
             <Calendar size={14} />
-            Reservations Slot
+            Reserve Slot
           </button>
         </div>
       </footer>
