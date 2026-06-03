@@ -1,7 +1,7 @@
 import React from "react";
-import { useFirebase } from "../FirebaseContext";
+import { useFirebase, safeStorage } from "../FirebaseContext";
 import { INITIAL_TUTORS_DATA } from "../constants";
-import { ArrowLeft, MessageSquare, Calendar, Star, MapPin, Award, BookOpen } from "lucide-react";
+import { ArrowLeft, MessageSquare, Calendar, Star, MapPin, Award, BookOpen, Heart } from "lucide-react";
 import { motion } from "motion/react";
 
 interface TutorProfileDetailProps {
@@ -11,11 +11,35 @@ interface TutorProfileDetailProps {
 }
 
 export const TutorProfileDetail: React.FC<TutorProfileDetailProps> = ({ tutorIndex, onBack, onBook }) => {
-  const { tutors, setActiveChatId } = useFirebase();
+  const { tutors, setActiveChatId, userProfile, triggerToast } = useFirebase();
 
   // Find dynamic tutor profile from firestore or constants
   const tutorData = tutors[tutorIndex - 1];
   const refStatic = INITIAL_TUTORS_DATA[tutorIndex - 1] || INITIAL_TUTORS_DATA[0];
+
+  const [isFavorite, setIsFavorite] = React.useState<boolean>(() => {
+    if (!userProfile?.uid || !tutorData?.uid) return false;
+    const favoritesKey = `tutorfind_favorites_${userProfile.uid}`;
+    const favorites = safeStorage.parseItem<string[]>(favoritesKey, []);
+    return favorites.includes(tutorData.uid);
+  });
+
+  const toggleFavorite = () => {
+    if (!userProfile?.uid || !tutorData?.uid) return;
+    const favoritesKey = `tutorfind_favorites_${userProfile.uid}`;
+    const favorites = safeStorage.parseItem<string[]>(favoritesKey, []);
+    let newFavorites;
+    if (favorites.includes(tutorData.uid)) {
+      newFavorites = favorites.filter((id: string) => id !== tutorData.uid);
+      setIsFavorite(false);
+      triggerToast("Removed from bookmarked favorites.");
+    } else {
+      newFavorites = [...favorites, tutorData.uid];
+      setIsFavorite(true);
+      triggerToast("Added to bookmarked favorites! ❤️");
+    }
+    safeStorage.setItem(favoritesKey, JSON.stringify(newFavorites));
+  };
 
   if (!tutorData) {
     return (
@@ -34,14 +58,29 @@ export const TutorProfileDetail: React.FC<TutorProfileDetailProps> = ({ tutorInd
   return (
     <div className="min-h-screen bg-white text-black flex flex-col font-sans">
       {/* HEADER BAR */}
-      <header className="sticky top-0 bg-white border-b-2 border-black z-40 px-4 py-3 flex items-center gap-3">
-        <button 
-          onClick={onBack}
-          className="p-1 px-2 border-2 border-black rounded hover:bg-neutral-100 text-black transition-all cursor-pointer"
-        >
-          <ArrowLeft size={16} />
-        </button>
-        <span className="font-bold text-black font-display text-sm uppercase tracking-wider">Review Credentials</span>
+      <header className="sticky top-0 bg-white border-b-2 border-black z-40 px-4 py-3 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={onBack}
+            className="p-1 px-2 border-2 border-black rounded hover:bg-neutral-100 text-black transition-all cursor-pointer flex items-center justify-center"
+          >
+            <ArrowLeft size={16} />
+          </button>
+          <span className="font-bold text-black font-display text-sm uppercase tracking-wider">Review Credentials</span>
+        </div>
+        
+        {userProfile?.role === "student" && (
+          <button
+            onClick={toggleFavorite}
+            className={`px-3 py-1.5 border-2 border-black rounded-lg transition-all cursor-pointer flex items-center gap-1.5 text-xs font-bold font-mono uppercase tracking-wider shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none ${
+              isFavorite ? "bg-red-500 text-white hover:bg-red-600" : "bg-white text-black hover:bg-neutral-50"
+            }`}
+            title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
+          >
+            <Heart size={14} fill={isFavorite ? "currentColor" : "none"} className={isFavorite ? "text-white animate-pulse" : "text-black"} />
+            <span>{isFavorite ? "Favorited" : "Favorite"}</span>
+          </button>
+        )}
       </header>
 
       {/* BODY PANEL */}

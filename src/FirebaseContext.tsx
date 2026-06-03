@@ -10,6 +10,39 @@ import { auth } from "./firebase";
 import { UserProfile, Booking, Chat, Message } from "./types";
 import { INITIAL_TUTORS_DATA } from "./constants";
 
+// Safe LocalStorage helpers supporting sandbox & iframe security constraints
+export const safeStorage = {
+  getItem: (key: string, fallback: string = ""): string => {
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        return window.localStorage.getItem(key) || fallback;
+      }
+    } catch (e) {
+      console.warn("Storage security exception or block:", e);
+    }
+    return fallback;
+  },
+  setItem: (key: string, value: string): void => {
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        window.localStorage.setItem(key, value);
+      }
+    } catch (e) {
+      console.warn("Storage security exception or block:", e);
+    }
+  },
+  parseItem: <T,>(key: string, fallback: T): T => {
+    try {
+      const val = safeStorage.getItem(key);
+      if (!val) return fallback;
+      return JSON.parse(val) as T;
+    } catch (e) {
+      console.warn(`JSON parsing error for key ${key}, resetting to default:`, e);
+      return fallback;
+    }
+  }
+};
+
 interface FirebaseContextType {
   currentUser: User | null;
   userProfile: UserProfile | null;
@@ -63,11 +96,11 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const getLocalBookings = (): Booking[] => {
-    return JSON.parse(localStorage.getItem("tutorfind_bookings") || "[]");
+    return safeStorage.parseItem<Booking[]>("tutorfind_bookings", []);
   };
 
   const saveLocalBookings = (newBookings: Booking[]) => {
-    localStorage.setItem("tutorfind_bookings", JSON.stringify(newBookings));
+    safeStorage.setItem("tutorfind_bookings", JSON.stringify(newBookings));
     if (currentUser && userProfile) {
       const filtered = newBookings.filter(b => 
         userProfile.role === "tutor" ? b.tutorId === currentUser.uid : b.studentId === currentUser.uid
@@ -82,11 +115,11 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const getLocalChats = (): Chat[] => {
-    return JSON.parse(localStorage.getItem("tutorfind_chats") || "[]");
+    return safeStorage.parseItem<Chat[]>("tutorfind_chats", []);
   };
 
   const saveLocalChats = (newChats: Chat[]) => {
-    localStorage.setItem("tutorfind_chats", JSON.stringify(newChats));
+    safeStorage.setItem("tutorfind_chats", JSON.stringify(newChats));
     if (currentUser && userProfile) {
       const filtered = newChats.filter(c => 
         userProfile.role === "tutor" ? c.tutorId === currentUser.uid : c.studentId === currentUser.uid
@@ -97,9 +130,9 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const saveProfileLocally = (uid: string, profile: UserProfile) => {
-    const localProfiles = JSON.parse(localStorage.getItem("tutorfind_user_profiles") || "{}");
+    const localProfiles = safeStorage.parseItem<Record<string, UserProfile>>("tutorfind_user_profiles", {});
     localProfiles[uid] = profile;
-    localStorage.setItem("tutorfind_user_profiles", JSON.stringify(localProfiles));
+    safeStorage.setItem("tutorfind_user_profiles", JSON.stringify(localProfiles));
     
     if (currentUser && currentUser.uid === uid) {
       setUserProfile(profile);
@@ -107,26 +140,26 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     // Also sync the tutors list if they are a tutor
     if (profile.role === "tutor") {
-      let localTutors = JSON.parse(localStorage.getItem("tutorfind_tutors") || "[]");
+      let localTutors = safeStorage.parseItem<UserProfile[]>("tutorfind_tutors", []);
       const idx = localTutors.findIndex((t: any) => t.uid === uid);
       if (idx !== -1) {
         localTutors[idx] = { ...localTutors[idx], ...profile };
       } else {
         localTutors = [profile, ...localTutors];
       }
-      localStorage.setItem("tutorfind_tutors", JSON.stringify(localTutors));
+      safeStorage.setItem("tutorfind_tutors", JSON.stringify(localTutors));
       setTutors(localTutors);
     }
   };
 
   // 1. Boostrap Initial Tutors into localStorage if they do not exist
   const bootstrapTutors = async () => {
-    let localTutors = localStorage.getItem("tutorfind_tutors");
+    let localTutors = safeStorage.getItem("tutorfind_tutors");
     if (!localTutors) {
-      localStorage.setItem("tutorfind_tutors", JSON.stringify(INITIAL_TUTORS_DATA));
+      safeStorage.setItem("tutorfind_tutors", JSON.stringify(INITIAL_TUTORS_DATA));
       setTutors(INITIAL_TUTORS_DATA);
     } else {
-      setTutors(JSON.parse(localTutors));
+      setTutors(safeStorage.parseItem<UserProfile[]>("tutorfind_tutors", INITIAL_TUTORS_DATA));
     }
   };
 
@@ -136,7 +169,7 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setCurrentUser(user);
       if (user) {
         // Authenticated, check physical localStorage profile representation
-        const localProfiles = JSON.parse(localStorage.getItem("tutorfind_user_profiles") || "{}");
+        const localProfiles = safeStorage.parseItem<Record<string, UserProfile>>("tutorfind_user_profiles", {});
         let profile = localProfiles[user.uid];
         if (!profile) {
           const isTutor = user.email?.toLowerCase().includes("tutor") || false;
@@ -160,33 +193,33 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             bio: isTutor ? "Dedicated tutor offering highly personalized sessions." : undefined
           };
           localProfiles[user.uid] = profile;
-          localStorage.setItem("tutorfind_user_profiles", JSON.stringify(localProfiles));
+          safeStorage.setItem("tutorfind_user_profiles", JSON.stringify(localProfiles));
         }
         setUserProfile(profile);
 
         // Load correct list of tutors
-        let localTutors = localStorage.getItem("tutorfind_tutors");
-        let tutorsList = INITIAL_TUTORS_DATA;
+        let localTutors = safeStorage.getItem("tutorfind_tutors");
+        let tutorsList: UserProfile[] = INITIAL_TUTORS_DATA as UserProfile[];
         if (!localTutors) {
-          localStorage.setItem("tutorfind_tutors", JSON.stringify(INITIAL_TUTORS_DATA));
+          safeStorage.setItem("tutorfind_tutors", JSON.stringify(INITIAL_TUTORS_DATA));
         } else {
-          tutorsList = JSON.parse(localTutors);
+          tutorsList = safeStorage.parseItem<UserProfile[]>("tutorfind_tutors", INITIAL_TUTORS_DATA as UserProfile[]);
         }
 
         if (profile.role === "tutor") {
           const exists = tutorsList.find(t => t.uid === profile.uid);
           if (!exists) {
             tutorsList = [profile, ...tutorsList];
-            localStorage.setItem("tutorfind_tutors", JSON.stringify(tutorsList));
+            safeStorage.setItem("tutorfind_tutors", JSON.stringify(tutorsList));
           } else {
             tutorsList = tutorsList.map(t => t.uid === profile.uid ? { ...t, ...profile } : t);
-            localStorage.setItem("tutorfind_tutors", JSON.stringify(tutorsList));
+            safeStorage.setItem("tutorfind_tutors", JSON.stringify(tutorsList));
           }
         }
         setTutors(tutorsList);
 
         // Filter bookings and chats for this user ID
-        const allBookings: Booking[] = JSON.parse(localStorage.getItem("tutorfind_bookings") || "[]");
+        const allBookings: Booking[] = safeStorage.parseItem<Booking[]>("tutorfind_bookings", []);
         const filteredBookings = allBookings.filter(b => 
           profile.role === "tutor" ? b.tutorId === user.uid : b.studentId === user.uid
         );
@@ -197,7 +230,7 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         });
         setBookings(filteredBookings);
 
-        const allChats: Chat[] = JSON.parse(localStorage.getItem("tutorfind_chats") || "[]");
+        const allChats: Chat[] = safeStorage.parseItem<Chat[]>("tutorfind_chats", []);
         const filteredChats = allChats.filter(c => 
           profile.role === "tutor" ? c.tutorId === user.uid : c.studentId === user.uid
         );
@@ -229,7 +262,7 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return;
     }
 
-    const allMessages = JSON.parse(localStorage.getItem("tutorfind_messages") || "{}");
+    const allMessages = safeStorage.parseItem<Record<string, Message[]>>("tutorfind_messages", {});
     const chatMsgs = allMessages[activeChatId] || [];
     setMessages(chatMsgs);
   }, [activeChatId]);
@@ -402,7 +435,7 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
       if (status === "confirmed") {
         const tutorId = booking.tutorId;
-        const localProfiles = JSON.parse(localStorage.getItem("tutorfind_user_profiles") || "{}");
+        const localProfiles = safeStorage.parseItem<Record<string, UserProfile>>("tutorfind_user_profiles", {});
         const tutorData = localProfiles[tutorId];
         if (tutorData) {
           tutorData.walletBalance = (tutorData.walletBalance || 0) + booking.rate;
@@ -412,7 +445,7 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         triggerToast("Request accepted, session scheduled!");
       } else if (status === "cancelled") {
         const studentId = booking.studentId;
-        const localProfiles = JSON.parse(localStorage.getItem("tutorfind_user_profiles") || "{}");
+        const localProfiles = safeStorage.parseItem<Record<string, UserProfile>>("tutorfind_user_profiles", {});
         const studentData = localProfiles[studentId];
         if (studentData) {
           studentData.walletBalance = (studentData.walletBalance || 0) + booking.rate;
@@ -440,7 +473,7 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       let chat = allChats.find(c => c.id === roomId);
 
       if (!chat) {
-        const localProfiles = JSON.parse(localStorage.getItem("tutorfind_user_profiles") || "{}");
+        const localProfiles = safeStorage.parseItem<Record<string, UserProfile>>("tutorfind_user_profiles", {});
         const student = localProfiles[studentId];
         const tutor = localProfiles[resolvedTutorId];
 
@@ -474,7 +507,7 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (!currentUser || !activeChatId || !userProfile) return;
     const msgId = "msg_" + Date.now();
     try {
-      const allMsgObj = JSON.parse(localStorage.getItem("tutorfind_messages") || "{}");
+      const allMsgObj = safeStorage.parseItem<Record<string, Message[]>>("tutorfind_messages", {});
       const chatMsgs = allMsgObj[activeChatId] || [];
 
       const newMsg: Message = {
@@ -486,7 +519,7 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       };
       chatMsgs.push(newMsg);
       allMsgObj[activeChatId] = chatMsgs;
-      localStorage.setItem("tutorfind_messages", JSON.stringify(allMsgObj));
+      safeStorage.setItem("tutorfind_messages", JSON.stringify(allMsgObj));
       setMessages([...chatMsgs]);
 
       // Update parent chat room
@@ -517,7 +550,7 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           const autoMsgId = "msg_auto_" + Date.now();
           const opposingId = activeChatId.split("_").find(id => id !== currentUser.uid) || "system";
 
-          const freshAllMsgObj = JSON.parse(localStorage.getItem("tutorfind_messages") || "{}");
+          const freshAllMsgObj = safeStorage.parseItem<Record<string, Message[]>>("tutorfind_messages", {});
           const freshChatMsgs = freshAllMsgObj[activeChatId] || [];
           const autoMsg: Message = {
             id: autoMsgId,
@@ -528,7 +561,7 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           };
           freshChatMsgs.push(autoMsg);
           freshAllMsgObj[activeChatId] = freshChatMsgs;
-          localStorage.setItem("tutorfind_messages", JSON.stringify(freshAllMsgObj));
+          safeStorage.setItem("tutorfind_messages", JSON.stringify(freshAllMsgObj));
           
           setMessages([...freshChatMsgs]);
 

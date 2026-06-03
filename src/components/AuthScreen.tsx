@@ -103,7 +103,7 @@ export const AuthScreen: React.FC = () => {
                 <User size={16} className="absolute left-3 top-3 text-neutral-500" />
                 <input
                   type="text"
-                  placeholder="e.g. Priyanjali Sen"
+                  placeholder="e.g. Ashwika Chaudhary"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 bg-white border-2 border-black rounded-lg text-black text-sm focus:outline-none focus:bg-neutral-50 transition-all font-sans"

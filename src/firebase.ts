@@ -37,7 +37,18 @@ export const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const analytics = typeof window !== "undefined" ? getAnalytics(app) : null;
+
+// Safe Analytics initialization to prevent white-screen crashes on load in adblock environments or subframe sandboxes
+let analyticsInstance = null;
+if (typeof window !== "undefined") {
+  try {
+    analyticsInstance = getAnalytics(app);
+  } catch (error) {
+    console.warn("Firebase Analytics could not be initialized (likely blocked by ad-blocker or iframe restrictions):", error);
+  }
+}
+export const analytics = analyticsInstance;
+
 export const db = getFirestore(app);
 
 // Operational types for Firestore security mapping

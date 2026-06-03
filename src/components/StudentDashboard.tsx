@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { useFirebase } from "../FirebaseContext";
+import { useFirebase, safeStorage } from "../FirebaseContext";
 import { SUBJECTS, GRADES, MODES, cityScore } from "../constants";
 import { 
   Search, MapPin, Star, Calendar, MessageSquare, 
   Wallet, User, LogOut, CheckCircle2, PlusCircle, 
-  Activity, Edit
+  Activity, Edit, Heart
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -32,6 +32,26 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onSelectTuto
   const [selectedGradeFilter, setSelectedGradeFilter] = useState("");
   const [selectedModeFilter, setSelectedModeFilter] = useState("");
   const [selectedLimitFee, setSelectedLimitFee] = useState(1000);
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [favorites, setFavorites] = useState<string[]>(() => {
+    if (!userProfile?.uid) return [];
+    return safeStorage.parseItem<string[]>(`tutorfind_favorites_${userProfile.uid}`, []);
+  });
+
+  const toggleFavorite = (tutorUid: string) => {
+    if (!userProfile?.uid) return;
+    const favoritesKey = `tutorfind_favorites_${userProfile.uid}`;
+    let newFavorites;
+    if (favorites.includes(tutorUid)) {
+      newFavorites = favorites.filter((id) => id !== tutorUid);
+      triggerToast("Removed from bookmarked favorites.");
+    } else {
+      newFavorites = [...favorites, tutorUid];
+      triggerToast("Added to bookmarked favorites! ❤️");
+    }
+    setFavorites(newFavorites);
+    safeStorage.setItem(favoritesKey, JSON.stringify(newFavorites));
+  };
 
   // Profile Edit Buffer
   const [isEditing, setIsEditing] = useState(false);
@@ -58,6 +78,9 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onSelectTuto
 
   // Dynamic filter algorithms applying local proximity
   const filteredTutors = tutors.filter(t => {
+    const isFavorited = favorites.includes(t.uid);
+    if (showFavoritesOnly && !isFavorited) return false;
+
     const matchesSearch = !searchQ || 
       t.name.toLowerCase().includes(searchQ.toLowerCase()) || 
       (t.city && t.city.toLowerCase().includes(searchQ.toLowerCase())) || 
@@ -196,8 +219,21 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onSelectTuto
 
               {/* Tutors Grid */}
               <div className="space-y-4">
-                <div className="flex items-center justify-between text-xs text-neutral-700 font-mono tracking-wider font-bold">
-                  <span>DISCOVER TUTORS ({filteredTutors.length})</span>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-neutral-700 font-mono tracking-wider font-bold">
+                  <div className="flex items-center gap-3">
+                    <span>DISCOVER TUTORS ({filteredTutors.length})</span>
+                    <button
+                      onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+                      className={`px-2.5 py-1 border-2 border-black rounded-lg text-[10px] font-bold uppercase transition-all flex items-center gap-1 active:translate-x-[1px] active:translate-y-[1px] cursor-pointer ${
+                        showFavoritesOnly 
+                          ? "bg-red-500 text-white" 
+                          : "bg-white text-black hover:bg-neutral-100"
+                      }`}
+                    >
+                      <Heart size={10} fill={showFavoritesOnly ? "currentColor" : "none"} />
+                      <span>{showFavoritesOnly ? "Favorites Only" : "Show Favorites"}</span>
+                    </button>
+                  </div>
                   <span>📍 Closest Indian Tutors First</span>
                 </div>
 
@@ -218,9 +254,25 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onSelectTuto
                         key={tutor.uid}
                         className="bg-white border-2 border-black rounded-lg p-5 hover:bg-neutral-50 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] transition-all relative overflow-hidden"
                       >
-                        {/* Status Rate */}
-                        <div className="absolute top-4 right-4 bg-black text-white hover:bg-neutral-900 border-2 border-black py-0.5 px-2.5 rounded-full font-mono text-[10px] uppercase font-bold tracking-wider">
-                          ₹{tutor.rate}/class
+                        {/* Status Rate & Favorite Button */}
+                        <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleFavorite(tutor.uid);
+                            }}
+                            className={`p-1.5 border-2 border-black rounded-full transition-all cursor-pointer flex items-center justify-center shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none ${
+                              favorites.includes(tutor.uid) 
+                                ? "bg-red-500 text-white hover:bg-red-600" 
+                                : "bg-white text-black hover:bg-neutral-50"
+                            }`}
+                            title={favorites.includes(tutor.uid) ? "Remove from Favorites" : "Add to Favorites"}
+                          >
+                            <Heart size={11} fill={favorites.includes(tutor.uid) ? "currentColor" : "none"} className={favorites.includes(tutor.uid) ? "text-white" : "text-black"} />
+                          </button>
+                          <div className="bg-black text-white hover:bg-neutral-900 border-2 border-black py-0.5 px-2.5 rounded-full font-mono text-[10px] uppercase font-bold tracking-wider">
+                            ₹{tutor.rate}/class
+                          </div>
                         </div>
 
                         <div className="flex items-start gap-4">

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useFirebase } from "./FirebaseContext";
+import { HashRouter } from "react-router-dom";
 import { AuthScreen } from "./components/AuthScreen";
 import { ProfileSetup } from "./components/ProfileSetup";
 import { StudentDashboard } from "./components/StudentDashboard";
@@ -53,8 +54,9 @@ export default function App() {
   const isTutor = userProfile.role === "tutor";
 
   return (
-    <div className="min-h-screen bg-slate-950 font-sans antialiased text-slate-100">
-      <AnimatePresence mode="wait">
+    <HashRouter>
+      <div className="min-h-screen bg-slate-950 font-sans antialiased text-slate-100">
+        <AnimatePresence mode="wait">
         {/* If Active Chat Room overlay triggers */}
         {activeChatId ? (
           <motion.div
@@ -143,5 +145,6 @@ export default function App() {
         )}
       </AnimatePresence>
     </div>
+  </HashRouter>
   );
 }
