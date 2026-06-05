@@ -32,17 +32,19 @@ service cloud.firestore {
         && (!data.keys().hasAny(['grade']) || (data.grade is string && data.grade.size() <= 50))
         && (!data.keys().hasAny(['bio']) || (data.bio is string && data.bio.size() <= 1000))
         && (!data.keys().hasAny(['qual']) || (data.qual is string && data.qual.size() <= 200))
-        && (!data.keys().hasAny(['rate']) || (data.rate is int && data.rate >= 0 && data.rate <= 10000))
-        && (!data.keys().hasAny(['maxFee']) || (data.maxFee is int && data.maxFee >= 0 && data.maxFee <= 10000))
-        && (!data.keys().hasAny(['avatar']) || (data.avatar is string && data.avatar.size() <= 100000))
-        && (!data.keys().hasAny(['color']) || (data.color is string && data.color.size() <= 10))
+        && (!data.keys().hasAny(['exp']) || (data.exp is string && data.exp.size() <= 100))
+        && (!data.keys().hasAny(['subjects']) || data.subjects is list)
+        && (!data.keys().hasAny(['rate']) || (data.rate is number && data.rate >= 0 && data.rate <= 10000))
+        && (!data.keys().hasAny(['maxFee']) || (data.maxFee is number && data.maxFee >= 0 && data.maxFee <= 10000))
+        && (!data.keys().hasAny(['avatar']) || (data.avatar is string && data.avatar.size() <= 1000000))
+        && (!data.keys().hasAny(['color']) || (data.color is string && data.color.size() <= 20))
         && (!data.keys().hasAny(['online']) || data.online is bool)
         && (!data.keys().hasAny(['rating']) || data.rating is number)
-        && (!data.keys().hasAny(['reviewsCount']) || data.reviewsCount is int)
-        && (!data.keys().hasAny(['walletBalance']) || data.walletBalance is int)
-        && (!data.keys().hasAny(['totalEarned']) || data.totalEarned is int)
-        && (!data.keys().hasAny(['withdrawn']) || data.withdrawn is int)
-        && (!data.keys().hasAny(['totalSpent']) || data.totalSpent is int);
+        && (!data.keys().hasAny(['reviewsCount']) || data.reviewsCount is number)
+        && (!data.keys().hasAny(['walletBalance']) || data.walletBalance is number)
+        && (!data.keys().hasAny(['totalEarned']) || data.totalEarned is number)
+        && (!data.keys().hasAny(['withdrawn']) || data.withdrawn is number)
+        && (!data.keys().hasAny(['totalSpent']) || data.totalSpent is number);
     }
 
     // Validation blueprints for Bookings
@@ -58,7 +60,7 @@ service cloud.firestore {
         && data.time is string && data.time.size() <= 50
         && (data.mode == 'Online' || data.mode == 'Offline')
         && (data.status == 'pending' || data.status == 'confirmed' || data.status == 'completed' || data.status == 'cancelled')
-        && data.rate is int && data.rate >= 0
+        && data.rate is number && data.rate >= 0
         && (!data.keys().hasAny(['msg']) || (data.msg is string && data.msg.size() <= 500));
     }
 
