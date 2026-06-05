@@ -23,10 +23,13 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onSelectTuto
     addFunding, 
     setActiveChatId, 
     updateBookingStatus,
-    triggerToast
+    triggerToast,
+    updateProfile,
+    createChatRoom
   } = useFirebase();
 
   const [activeTab, setActiveTab] = useState<"find" | "bookings" | "chats" | "wallet" | "profile">("find");
+  const [bookingSubTab, setBookingSubTab] = useState<"upcoming" | "history">("upcoming");
   const [searchQ, setSearchQ] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("");
   const [selectedGradeFilter, setSelectedGradeFilter] = useState("");
@@ -59,17 +62,19 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onSelectTuto
   const [editPhone, setEditPhone] = useState(userProfile?.phone || "");
   const [editCity, setEditCity] = useState(userProfile?.city || "");
   const [editMaxFee, setEditMaxFee] = useState(userProfile?.maxFee ? String(userProfile.maxFee) : "500");
+  const [editAvatar, setEditAvatar] = useState(userProfile?.avatar || "");
 
   const handleSaveProfile = async () => {
     if (!editName || !editCity) {
       triggerToast("Name and City are required.");
       return;
     }
-    await useFirebase().updateProfile({
+    await updateProfile({
       name: editName,
       phone: editPhone,
       city: editCity,
-      maxFee: Number(editMaxFee) || 500
+      maxFee: Number(editMaxFee) || 500,
+      avatar: editAvatar
     });
     setIsEditing(false);
   };
@@ -147,7 +152,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onSelectTuto
               className="space-y-6"
             >
               {/* Search Panel */}
-              <div className="bg-white rounded-xl border-2 border-black p-4 space-y-4 shadow-[4px_4px_0px_0px_rgba(75,85,99,1)]">
+              <div className="bg-white rounded-xl border-2 border-black p-4 space-y-4 shadow-[4px_4px_0px_0px_rgba(17,24,39,1)]">
                 <div className="relative">
                   <Search size={18} className="absolute left-4 top-3.5 text-neutral-500" />
                   <input
@@ -252,7 +257,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onSelectTuto
                       <motion.div
                       layout
                         key={tutor.uid}
-                        className="bg-white border-2 border-black rounded-lg p-5 hover:bg-neutral-50 shadow-[4px_4px_0px_0px_rgba(75,85,99,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[5px_5px_0px_0px_rgba(75,85,99,1)] transition-all relative overflow-hidden"
+                        className="bg-white border-2 border-black rounded-lg p-5 hover:bg-neutral-50 shadow-[4px_4px_0px_0px_rgba(17,24,39,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[5px_5px_0px_0px_rgba(17,24,39,1)] transition-all relative overflow-hidden"
                       >
                         {/* Status Rate & Favorite Button */}
                         <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
@@ -261,7 +266,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onSelectTuto
                               e.stopPropagation();
                               toggleFavorite(tutor.uid);
                             }}
-                            className={`p-1.5 border-2 border-black rounded-full transition-all cursor-pointer flex items-center justify-center shadow-[1px_1px_0px_0px_rgba(75,85,99,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none ${
+                            className={`p-1.5 border-2 border-black rounded-full transition-all cursor-pointer flex items-center justify-center shadow-[1px_1px_0px_0px_rgba(17,24,39,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none ${
                               favorites.includes(tutor.uid) 
                                 ? "bg-red-500 text-white hover:bg-red-600" 
                                 : "bg-white text-black hover:bg-neutral-50"
@@ -277,11 +282,15 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onSelectTuto
 
                         <div className="flex items-start gap-4">
                           <div 
-                            className="w-12 h-12 rounded-full border-2 border-black flex items-center justify-center font-bold text-white uppercase relative flex-shrink-0 bg-black"
+                            className="w-12 h-12 rounded-full border-2 border-black flex items-center justify-center font-bold text-white uppercase relative flex-shrink-0 bg-black overflow-hidden"
                           >
-                            {tutor.avatar || tutor.name.slice(0, 2)}
+                            {tutor.avatar && (tutor.avatar.startsWith("data:image/") || tutor.avatar.startsWith("http")) ? (
+                              <img src={tutor.avatar} alt={tutor.name} className="w-full h-full object-cover" />
+                            ) : (
+                              tutor.avatar || tutor.name.slice(0, 2)
+                            )}
                             {tutor.online && (
-                              <span className="absolute bottom-0 right-0 w-3 h-3 bg-neutral-900 border-2 border-white rounded-full" />
+                              <span className="absolute bottom-0 right-0 w-3 h-3 bg-neutral-900 border-2 border-white rounded-full z-10" />
                             )}
                           </div>
 
@@ -334,7 +343,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onSelectTuto
                         <div className="mt-5 pt-4 border-t-2 border-neutral-100 flex gap-2">
                           <button
                             onClick={async () => {
-                              const rId = await useFirebase().createChatRoom(tutor.uid);
+                              const rId = await createChatRoom(tutor.uid);
                               setActiveChatId(rId);
                               setActiveTab("chats");
                             }}
@@ -350,7 +359,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onSelectTuto
                                 onBookTutor(tIdx + 1);
                               }
                             }}
-                            className="flex-1 py-1.5 text-xs bg-black hover:bg-neutral-900 text-white rounded-md cursor-pointer font-bold transition-all flex items-center justify-center gap-1.5 shadow-[2px_2px_0px_0px_rgba(75,85,99,1)] uppercase tracking-wide border-2 border-black"
+                            className="flex-1 py-1.5 text-xs bg-black hover:bg-neutral-900 text-white rounded-md cursor-pointer font-bold transition-all flex items-center justify-center gap-1.5 shadow-[2px_2px_0px_0px_rgba(17,24,39,1)] uppercase tracking-wide border-2 border-black"
                           >
                             <Calendar size={13} />
                             Book Session
@@ -370,73 +379,143 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onSelectTuto
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="space-y-4"
+              className="space-y-6"
             >
-              <h2 className="text-xl font-bold font-display text-black uppercase tracking-tight mb-2">My Bookings History</h2>
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-xl font-bold font-display text-black uppercase tracking-tight">My Class Schedules &amp; Logs</h2>
+                  <p className="text-xs text-neutral-500 font-mono mt-0.5">Track upcoming learning bookings and historical logs.</p>
+                </div>
+                
+                {/* SUB-TABS SELECTOR */}
+                <div className="flex border-2 border-black rounded-lg overflow-hidden bg-white shadow-[2px_2px_0px_0px_rgba(17,24,39,1)] self-start md:self-auto shrink-0 font-mono text-xs font-bold">
+                  <button
+                    onClick={() => setBookingSubTab("upcoming")}
+                    className={`px-3 py-1.5 transition-all text-[11px] uppercase cursor-pointer ${
+                      bookingSubTab === "upcoming" 
+                        ? "bg-black text-white" 
+                        : "bg-white text-neutral-600 hover:text-black hover:bg-neutral-50"
+                    }`}
+                  >
+                    Upcoming Sessions
+                  </button>
+                  <button
+                    onClick={() => setBookingSubTab("history")}
+                    className={`px-3 py-1.5 transition-all text-[11px] uppercase cursor-pointer border-l-2 border-black ${
+                      bookingSubTab === "history" 
+                        ? "bg-black text-white" 
+                        : "bg-white text-neutral-600 hover:text-black hover:bg-neutral-50"
+                    }`}
+                  >
+                    Session History
+                  </button>
+                </div>
+              </div>
 
-              {studentBookings.length === 0 ? (
-                <div className="py-12 text-center bg-white rounded-xl border-2 border-black">
-                  <p className="text-neutral-400 text-3xl mb-4">🗓️</p>
-                  <h3 className="text-black font-bold font-display uppercase tracking-wider">No lectures booked yet</h3>
-                  <p className="text-xs text-neutral-500 mt-1">
-                    Book your first tutor by filtering subjects in the Find dashboard.
+              {studentBookings.filter(b => bookingSubTab === "upcoming" ? (b.status === "pending" || b.status === "confirmed") : (b.status === "completed" || b.status === "cancelled")).length === 0 ? (
+                <div className="py-12 text-center bg-white rounded-xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(17,24,39,1)]">
+                  <p className="text-neutral-400 text-3xl mb-4">
+                    {bookingSubTab === "upcoming" ? "📅" : "📜"}
+                  </p>
+                  <h3 className="text-black font-bold font-display uppercase tracking-wider">
+                    {bookingSubTab === "upcoming" ? "No active upcoming classes" : "No past sessions found"}
+                  </h3>
+                  <p className="text-xs text-neutral-500 mt-1 max-w-sm mx-auto px-4">
+                    {bookingSubTab === "upcoming" 
+                      ? "Book your high fidelity learning slots directly from the tutor directories." 
+                      : "Completed state transformations and processed requests logs are archived here."}
                   </p>
                 </div>
               ) : (
-                studentBookings.map((book) => (
-                  <div key={book.id} className="bg-white border-2 border-black rounded-lg p-5 shadow-[4px_4px_0px_0px_rgba(75,85,99,1)] space-y-4">
-                    <div className="flex items-center gap-3">
-                      <div 
-                        className="w-10 h-10 rounded-full border-2 border-black flex items-center justify-center text-xs font-bold text-white uppercase bg-black"
-                      >
-                        {book.tutorAvatar || "T"}
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-bold text-sm text-black">{book.tutorName}</h4>
-                        <p className="text-xs text-neutral-500 font-semibold">{book.subject}</p>
-                      </div>
-                      <span className={`text-[10px] font-mono font-bold uppercase tracking-wider py-1 px-2.5 border-2 rounded-full ${
-                        book.status === "confirmed" 
-                          ? "bg-black text-white border-black"
-                          : book.status === "pending"
-                          ? "bg-neutral-100 text-black border-black"
-                          : "bg-white text-neutral-400 border-neutral-300"
-                      }`}>
-                        {book.status}
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 pt-1 border-t-2 border-neutral-100 pb-1 font-sans">
-                      <div className="p-2 bg-neutral-50 border-2 border-black rounded-lg text-center">
-                        <span className="block text-[8px] font-extrabold text-neutral-500 tracking-wider font-mono">DATE</span>
-                        <span className="text-xs text-black font-bold">{book.date}</span>
-                      </div>
-                      <div className="p-2 bg-neutral-50 border-2 border-black rounded-lg text-center">
-                        <span className="block text-[8px] font-extrabold text-neutral-500 tracking-wider font-mono">TIME</span>
-                        <span className="text-xs text-black font-bold">{book.time}</span>
-                      </div>
-                      <div className="p-2 bg-neutral-50 border-2 border-black rounded-lg text-center">
-                        <span className="block text-[8px] font-extrabold text-neutral-500 tracking-wider font-mono">MODE</span>
-                        <span className="text-xs text-black font-bold">{book.mode}</span>
-                      </div>
-                      <div className="p-2 bg-neutral-50 border-2 border-black rounded-lg text-center">
-                        <span className="block text-[8px] font-extrabold text-neutral-500 tracking-wider font-mono">RATE LOCKED</span>
-                        <span className="text-xs text-black font-bold font-mono">₹{book.rate}</span>
-                      </div>
-                    </div>
-
-                    {book.status === "pending" && (
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => updateBookingStatus(book.id, "cancelled")}
-                          className="flex-1 py-1.5 text-neutral-500 hover:text-black hover:border-black bg-white border border-neutral-300 text-xs font-bold rounded cursor-pointer"
+                studentBookings
+                  .filter(b => bookingSubTab === "upcoming" ? (b.status === "pending" || b.status === "confirmed") : (b.status === "completed" || b.status === "cancelled"))
+                  .map((book) => (
+                    <div key={book.id} className="bg-white border-2 border-black rounded-lg p-5 shadow-[4px_4px_0px_0px_rgba(17,24,39,1)] space-y-4">
+                      <div className="flex items-center gap-3">
+                        <div 
+                          className="w-10 h-10 rounded-full border-2 border-black flex items-center justify-center text-xs font-bold text-white uppercase bg-black"
                         >
-                          Cancel Request
-                        </button>
+                          {book.tutorAvatar || "T"}
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-bold text-sm text-black">{book.tutorName}</h4>
+                          <p className="text-xs text-neutral-500 font-semibold">{book.subject}</p>
+                        </div>
+                        <span className={`text-[10px] font-mono font-bold uppercase tracking-wider py-1 px-2.5 border-2 rounded-full ${
+                          book.status === "confirmed" 
+                            ? "bg-emerald-500 text-white border-black"
+                            : book.status === "pending"
+                            ? "bg-amber-100 text-black border-black animate-pulse"
+                            : book.status === "completed"
+                            ? "bg-black text-white border-black"
+                            : "bg-rose-100 text-rose-700 border-rose-450"
+                        }`}>
+                          {book.status}
+                        </span>
                       </div>
-                    )}
-                  </div>
-                ))
+
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 pt-1 border-t-2 border-neutral-100 pb-1 font-sans">
+                        <div className="p-2 bg-neutral-50 border-2 border-black rounded-lg text-center">
+                          <span className="block text-[8px] font-extrabold text-neutral-500 tracking-wider font-mono">DATE</span>
+                          <span className="text-xs text-black font-bold">{book.date}</span>
+                        </div>
+                        <div className="p-2 bg-neutral-50 border-2 border-black rounded-lg text-center">
+                          <span className="block text-[8px] font-extrabold text-neutral-500 tracking-wider font-mono">TIME</span>
+                          <span className="text-xs text-black font-bold">{book.time}</span>
+                        </div>
+                        <div className="p-2 bg-neutral-50 border-2 border-black rounded-lg text-center">
+                          <span className="block text-[8px] font-extrabold text-neutral-500 tracking-wider font-mono">MODE</span>
+                          <span className="text-xs text-black font-bold">{book.mode}</span>
+                        </div>
+                        <div className="p-2 bg-neutral-50 border-2 border-black rounded-lg text-center">
+                          <span className="block text-[8px] font-extrabold text-neutral-500 tracking-wider font-mono">RATE LOCKED</span>
+                          <span className={`text-xs font-bold font-mono ${book.status === 'cancelled' ? 'line-through text-neutral-400' : 'text-black'}`}>₹{book.rate}</span>
+                        </div>
+                      </div>
+
+                      {/* CONTEXT ACTIONS */}
+                      {book.status === "pending" && (
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => updateBookingStatus(book.id, "cancelled")}
+                            className="flex-1 py-1.5 text-rose-650 hover:bg-rose-50 border-2 border-black text-xs font-semibold rounded cursor-pointer transition-all active:translate-y-[1px]"
+                          >
+                            Cancel Request (Instant Refund)
+                          </button>
+                        </div>
+                      )}
+
+                      {book.status === "confirmed" && (
+                        <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                          <button
+                            onClick={() => updateBookingStatus(book.id, "cancelled")}
+                            className="flex-1 py-1.5 bg-white text-black hover:bg-neutral-50 border-2 border-black text-xs font-bold rounded cursor-pointer transition-all active:translate-y-[1px]"
+                          >
+                            Cancel Session (Full Refund)
+                          </button>
+                          <button
+                            onClick={() => updateBookingStatus(book.id, "completed")}
+                            className="flex-1 py-1.5 bg-black hover:bg-neutral-900 border-2 border-black text-white text-xs font-bold rounded cursor-pointer transition-all flex items-center justify-center gap-1.5 shadow-[2px_2px_0px_0px_rgba(17,24,39,1)] active:translate-y-[1px]"
+                          >
+                            <CheckCircle2 size={13} />
+                            Log Session as Completed
+                          </button>
+                        </div>
+                      )}
+
+                      {book.status === "completed" && (
+                        <p className="text-[10px] text-neutral-500 text-center uppercase tracking-wide font-mono font-bold">
+                          🎉 Class successfully completed and archived.
+                        </p>
+                      )}
+
+                      {book.status === "cancelled" && (
+                        <p className="text-[10px] text-rose-700 text-center uppercase tracking-wide font-mono font-bold">
+                          ❌ Cancelled. Funds of ₹{book.rate} reverted fully to student balance.
+                        </p>
+                      )}
+                    </div>
+                  ))
               )}
             </motion.div>
           )}
@@ -467,7 +546,6 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onSelectTuto
                       key={c.id}
                       onClick={() => {
                         setActiveChatId(c.id);
-                        useFirebase().setActiveChatId(c.id);
                       }}
                       className={`p-4 rounded-lg border-2 transition-all cursor-pointer flex items-center gap-4 ${
                         hasUnread 
@@ -476,11 +554,15 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onSelectTuto
                       }`}
                     >
                       <div 
-                        className="w-11 h-11 rounded-full border-2 border-black flex items-center justify-center font-bold text-white uppercase relative bg-black flex-shrink-0"
+                        className="w-11 h-11 rounded-full border-2 border-black flex items-center justify-center font-bold text-white uppercase relative bg-black flex-shrink-0 overflow-hidden"
                       >
-                        {c.tutorAvatar || "T"}
+                        {c.tutorAvatar && (c.tutorAvatar.startsWith("data:image/") || c.tutorAvatar.startsWith("http")) ? (
+                          <img src={c.tutorAvatar} alt={c.tutorName || "Tutor"} className="w-full h-full object-cover" />
+                        ) : (
+                          c.tutorAvatar || "T"
+                        )}
                         {hasUnread && (
-                          <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-black rounded-full border border-white" />
+                          <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-black rounded-full border border-white z-10" />
                         )}
                       </div>
 
@@ -516,7 +598,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onSelectTuto
               exit={{ opacity: 0, y: -10 }}
               className="space-y-6"
             >
-              <div className="bg-white border-2 border-black rounded-xl p-6 relative overflow-hidden shadow-[4px_4px_0px_0px_rgba(75,85,99,1)]">
+              <div className="bg-white border-2 border-black rounded-xl p-6 relative overflow-hidden shadow-[4px_4px_0px_0px_rgba(17,24,39,1)]">
                 <span className="text-[10px] font-bold tracking-wider font-mono text-neutral-500 uppercase">My Credit Balance</span>
                 <h3 className="text-4xl font-bold font-display text-black mt-1.5 flex items-baseline gap-1 uppercase">
                   ₹{userProfile?.walletBalance || 0}
@@ -530,7 +612,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onSelectTuto
                 <div className="grid grid-cols-2 gap-3 pt-5 border-t-2 border-neutral-100 mt-5">
                   <button 
                     onClick={() => addFunding(500)}
-                    className="py-3 px-4 bg-black hover:bg-neutral-900 border-2 border-black text-white font-bold text-xs rounded-lg transition-all cursor-pointer text-center flex items-center justify-center gap-2 shadow-[2px_2px_0px_0px_rgba(75,85,99,1)] uppercase tracking-wide"
+                    className="py-3 px-4 bg-black hover:bg-neutral-900 border-2 border-black text-white font-bold text-xs rounded-lg transition-all cursor-pointer text-center flex items-center justify-center gap-2 shadow-[2px_2px_0px_0px_rgba(17,24,39,1)] uppercase tracking-wide"
                   >
                     <PlusCircle size={14} /> Add ₹500
                   </button>
@@ -572,12 +654,16 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onSelectTuto
               exit={{ opacity: 0, y: -10 }}
               className="space-y-6"
             >
-              <div className="bg-white border-2 border-black rounded-lg p-6 shadow-[4px_4px_0px_0px_rgba(75,85,99,1)] relative">
+              <div className="bg-white border-2 border-black rounded-lg p-6 shadow-[4px_4px_0px_0px_rgba(17,24,39,1)] relative">
                 <div className="flex items-center gap-4">
                   <div 
-                    className="w-16 h-16 rounded-full border-2 border-black flex items-center justify-center text-2xl font-bold text-white uppercase bg-black"
+                    className="w-16 h-16 rounded-full border-2 border-black flex items-center justify-center text-2xl font-bold text-white uppercase bg-black overflow-hidden shrink-0"
                   >
-                    {userProfile?.avatar || userProfile?.name.slice(0, 2)}
+                    {userProfile?.avatar && (userProfile.avatar.startsWith("data:image/") || userProfile.avatar.startsWith("http")) ? (
+                      <img src={userProfile.avatar} alt={userProfile.name} className="w-full h-full object-cover" />
+                    ) : (
+                      userProfile?.avatar || userProfile?.name.slice(0, 2)
+                    )}
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-black font-display uppercase tracking-wider flex items-center gap-1.5">
@@ -594,6 +680,70 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onSelectTuto
 
                 {isEditing ? (
                   <div className="mt-6 pt-6 border-t-2 border-neutral-100 space-y-4">
+                    {/* Profile Picture Upload View */}
+                    <div className="flex flex-col sm:flex-row items-center gap-4 p-4 border-2 border-dashed border-black rounded-xl bg-neutral-50">
+                      <div className="w-16 h-16 rounded-full border-2 border-black bg-black flex items-center justify-center text-white text-xl font-bold uppercase overflow-hidden shrink-0">
+                        {editAvatar && (editAvatar.startsWith("data:image/") || editAvatar.startsWith("http")) ? (
+                          <img src={editAvatar} alt="Preview" className="w-full h-full object-cover" />
+                        ) : (
+                          editAvatar || editName.slice(0, 2) || "S"
+                        )}
+                      </div>
+                      <div className="flex-1 space-y-1 text-center sm:text-left">
+                        <label className="text-[10px] font-bold uppercase tracking-wider text-black block">Profile Picture Image</label>
+                        <p className="text-[9px] text-neutral-500 font-mono">Upload JPG/PNG, auto-compressed to Firestore DB size</p>
+                        <div className="flex flex-wrap gap-2 pt-1 justify-center sm:justify-start">
+                          <label className="py-1 px-2.5 bg-black hover:bg-neutral-900 border border-black text-white text-[10px] font-bold rounded cursor-pointer uppercase tracking-wider">
+                            Choose File
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onload = (ev) => {
+                                    const img = new Image();
+                                    img.onload = () => {
+                                      const canvas = document.createElement("canvas");
+                                      const MAX_W = 150;
+                                      const MAX_H = 150;
+                                      let w = img.width;
+                                      let h = img.height;
+                                      if (w > h) {
+                                        if (w > MAX_W) { h *= MAX_W / w; w = MAX_W; }
+                                      } else {
+                                        if (h > MAX_H) { w *= MAX_H / h; h = MAX_H; }
+                                      }
+                                      canvas.width = w;
+                                      canvas.height = h;
+                                      const ctx = canvas.getContext("2d");
+                                      if (ctx) {
+                                        ctx.drawImage(img, 0, 0, w, h);
+                                        setEditAvatar(canvas.toDataURL("image/jpeg", 0.8));
+                                      }
+                                    };
+                                    img.src = ev.target?.result as string;
+                                  };
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                          </label>
+                          {editAvatar && (editAvatar.startsWith("data:image/") || editAvatar.startsWith("http")) && (
+                            <button
+                              type="button"
+                              onClick={() => setEditAvatar(userProfile?.name?.split(" ").filter(Boolean).map(w => w[0]).join("").toUpperCase().slice(0, 2) || "S")}
+                              className="py-1 px-2.5 bg-white hover:bg-neutral-50 border border-black text-black text-[10px] font-bold rounded cursor-pointer uppercase tracking-wider"
+                            >
+                              Remove Picture
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-1.5">
                         <label className="text-[10px] font-bold text-neutral-600 uppercase tracking-widest font-mono">Name</label>
@@ -640,7 +790,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onSelectTuto
                     <div className="flex gap-2 pt-2">
                       <button
                         onClick={handleSaveProfile}
-                        className="flex-1 py-2 bg-black hover:bg-neutral-950 text-white text-xs font-bold font-display uppercase tracking-wide rounded border-2 border-black shadow-[2px_2px_0px_0px_rgba(75,85,99,1)] cursor-pointer"
+                        className="flex-1 py-2 bg-black hover:bg-neutral-950 text-white text-xs font-bold font-display uppercase tracking-wide rounded border-2 border-black shadow-[2px_2px_0px_0px_rgba(17,24,39,1)] cursor-pointer"
                       >
                         Save Configuration
                       </button>
@@ -684,7 +834,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onSelectTuto
                           setEditMaxFee(userProfile?.maxFee ? String(userProfile.maxFee) : "500");
                           setIsEditing(true);
                         }}
-                        className="w-full py-2 bg-white hover:bg-neutral-50 text-black border-2 border-black text-xs font-bold font-display uppercase tracking-wider rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-[2px_2px_0px_0px_rgba(75,85,99,1)]"
+                        className="w-full py-2 bg-white hover:bg-neutral-50 text-black border-2 border-black text-xs font-bold font-display uppercase tracking-wider rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-[2px_2px_0px_0px_rgba(17,24,39,1)]"
                       >
                         <Edit size={13} />
                         Modify Profile Details

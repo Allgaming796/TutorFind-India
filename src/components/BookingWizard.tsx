@@ -94,11 +94,15 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ tutorIndex, onBack
       <div className="flex-1 max-w-lg w-full mx-auto p-4 space-y-6 pb-24">
         
         {/* TUTOR QUICK RECAP */}
-        <div className="bg-white border-2 border-black rounded-lg p-4 flex items-center gap-4 shadow-[4px_4px_0px_0px_rgba(75,85,99,1)]">
+        <div className="bg-white border-2 border-black rounded-lg p-4 flex items-center gap-4 shadow-[4px_4px_0px_0px_rgba(17,24,39,1)]">
           <div 
-            className="w-11 h-11 rounded-full border-2 border-black flex items-center justify-center font-bold text-white uppercase bg-black"
+            className="w-11 h-11 rounded-full border-2 border-black flex items-center justify-center font-bold text-white uppercase bg-black overflow-hidden shrink-0"
           >
-            {tutor.avatar || tutor.name.slice(0, 2)}
+            {tutor.avatar && (tutor.avatar.startsWith("data:image/") || tutor.avatar.startsWith("http")) ? (
+              <img src={tutor.avatar} alt={tutor.name} className="w-full h-full object-cover" />
+            ) : (
+              tutor.avatar || tutor.name.slice(0, 2)
+            )}
           </div>
           <div>
             <h3 className="font-bold text-black leading-tight font-display uppercase tracking-wide">{tutor.name}</h3>
@@ -230,7 +234,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ tutorIndex, onBack
           </div>
 
           {/* BOOKING TOTAL CARD */}
-          <div className="bg-white border-2 border-black rounded-lg p-4 space-y-2 shadow-[2px_2px_0px_0px_rgba(75,85,99,1)]">
+          <div className="bg-white border-2 border-black rounded-lg p-4 space-y-2 shadow-[2px_2px_0px_0px_rgba(17,24,39,1)]">
             <span className="text-[9px] font-extrabold tracking-wider font-mono uppercase text-neutral-500">LECTURE OVERVIEW STATS</span>
             <div className="flex justify-between items-center text-xs">
               <span className="text-neutral-500 font-sans">Topic selected:</span>
@@ -252,7 +256,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ tutorIndex, onBack
             className={`w-full py-3.5 rounded-lg font-bold font-display uppercase tracking-widest text-xs border-2 transition-all ${
               insufficientFunds 
                 ? "bg-neutral-100 text-neutral-400 border-neutral-200 cursor-not-allowed" 
-                : "bg-black text-white border-black cursor-pointer shadow-[4px_4px_0px_0px_rgba(75,85,99,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+                : "bg-black text-white border-black cursor-pointer shadow-[4px_4px_0px_0px_rgba(17,24,39,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
             }`}
           >
             Confirm Reservation Request

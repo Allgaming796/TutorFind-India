@@ -129,7 +129,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ onBack }) => {
         />
         <button
           type="submit"
-          className="p-3 bg-black hover:bg-neutral-900 border-2 border-black text-white rounded-lg flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(75,85,99,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none cursor-pointer"
+          className="p-3 bg-black hover:bg-neutral-900 border-2 border-black text-white rounded-lg flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(17,24,39,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none cursor-pointer"
         >
           <Send size={14} />
         </button>

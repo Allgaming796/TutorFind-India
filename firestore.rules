@@ -34,7 +34,7 @@ service cloud.firestore {
         && (!data.keys().hasAny(['qual']) || (data.qual is string && data.qual.size() <= 200))
         && (!data.keys().hasAny(['rate']) || (data.rate is int && data.rate >= 0 && data.rate <= 10000))
         && (!data.keys().hasAny(['maxFee']) || (data.maxFee is int && data.maxFee >= 0 && data.maxFee <= 10000))
-        && (!data.keys().hasAny(['avatar']) || (data.avatar is string && data.avatar.size() <= 10))
+        && (!data.keys().hasAny(['avatar']) || (data.avatar is string && data.avatar.size() <= 100000))
         && (!data.keys().hasAny(['color']) || (data.color is string && data.color.size() <= 10))
         && (!data.keys().hasAny(['online']) || data.online is bool)
         && (!data.keys().hasAny(['rating']) || data.rating is number)

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useFirebase } from "../FirebaseContext";
 import { 
   Users, Check, X, MessageSquare, Wallet, User, Activity, 
-  LogOut, Star, Edit, TrendingUp, Sparkles
+  LogOut, Star, Edit, TrendingUp, Sparkles, CheckCircle2, Calendar
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -15,10 +15,13 @@ export const TutorDashboard: React.FC = () => {
     updateBookingStatus, 
     withdrawFunding, 
     setActiveChatId,
-    triggerToast 
+    triggerToast,
+    updateProfile,
+    createChatRoom
   } = useFirebase();
 
   const [activeTab, setActiveTab] = useState<"overview" | "requests" | "chats" | "wallet" | "profile">("overview");
+  const [sessionSubTab, setSessionSubTab] = useState<"requests" | "upcoming" | "history">("requests");
   const [weeklyTargetClasses, setWeeklyTargetClasses] = useState(5);
 
   // Profile Edit Buffer
@@ -28,18 +31,20 @@ export const TutorDashboard: React.FC = () => {
   const [editExp, setEditExp] = useState(userProfile?.exp || "");
   const [editBio, setEditBio] = useState(userProfile?.bio || "");
   const [editQual, setEditQual] = useState(userProfile?.qual || "");
+  const [editAvatar, setEditAvatar] = useState(userProfile?.avatar || "");
 
   const handleSaveProfile = async () => {
     if (!editName || !editRate || isNaN(Number(editRate))) {
       triggerToast("Name and valid Fee rate are required.");
       return;
     }
-    await useFirebase().updateProfile({
+    await updateProfile({
       name: editName,
       rate: Number(editRate),
       exp: editExp,
       bio: editBio,
-      qual: editQual
+      qual: editQual,
+      avatar: editAvatar
     });
     setIsEditing(false);
   };
@@ -103,21 +108,21 @@ export const TutorDashboard: React.FC = () => {
             >
               {/* Overview Cards */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div className="bg-white border-2 border-black p-4 rounded-lg shadow-[4px_4px_0px_0px_rgba(75,85,99,1)]">
+                <div className="bg-white border-2 border-black p-4 rounded-lg shadow-[4px_4px_0px_0px_rgba(17,24,39,1)]">
                   <span className="text-[9px] font-bold text-neutral-500 font-mono tracking-wider uppercase block">HOURLY RATE</span>
                   <div className="text-xl font-bold font-display text-black mt-1">₹{userProfile?.rate || 0}/class</div>
                 </div>
-                <div className="bg-white border-2 border-black p-4 rounded-lg shadow-[4px_4px_0px_0px_rgba(75,85,99,1)]">
+                <div className="bg-white border-2 border-black p-4 rounded-lg shadow-[4px_4px_0px_0px_rgba(17,24,39,1)]">
                   <span className="text-[9px] font-bold text-neutral-500 font-mono tracking-wider uppercase block">COINS CLEARED</span>
                   <div className="text-xl font-bold font-display text-black mt-1">₹{userProfile?.walletBalance || 0}</div>
                 </div>
-                <div className="bg-white border-2 border-black p-4 rounded-lg shadow-[4px_4px_0px_0px_rgba(75,85,99,1)]">
+                <div className="bg-white border-2 border-black p-4 rounded-lg shadow-[4px_4px_0px_0px_rgba(17,24,39,1)]">
                   <span className="text-[9px] font-bold text-neutral-500 font-mono tracking-wider uppercase block">RATING</span>
                   <div className="text-xl font-bold font-display text-black mt-1 flex items-center gap-1">
                     {userProfile?.rating || "5.0"} <Star size={14} fill="currentColor" className="text-black" />
                   </div>
                 </div>
-                <div className="bg-white border-2 border-black p-4 rounded-lg shadow-[4px_4px_0px_0px_rgba(75,85,99,1)]">
+                <div className="bg-white border-2 border-black p-4 rounded-lg shadow-[4px_4px_0px_0px_rgba(17,24,39,1)]">
                   <span className="text-[9px] font-bold text-neutral-500 font-mono tracking-wider uppercase block">CHATS</span>
                   <div className="text-xl font-bold font-display text-black mt-1">{chats.length}</div>
                 </div>
@@ -141,7 +146,7 @@ export const TutorDashboard: React.FC = () => {
                   </div>
                 ) : (
                   pendingRequests.slice(0, 3).map((req) => (
-                    <div key={req.id} className="bg-white border-2 border-black rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-[4px_4px_0px_0px_rgba(75,85,99,1)]">
+                    <div key={req.id} className="bg-white border-2 border-black rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-[4px_4px_0px_0px_rgba(17,24,39,1)]">
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="p-1 px-2 bg-neutral-100 text-black border border-neutral-350 rounded font-bold text-[9px] uppercase font-mono">
@@ -163,7 +168,7 @@ export const TutorDashboard: React.FC = () => {
                       <div className="flex items-center gap-2 flex-shrink-0">
                         <button
                           onClick={async () => {
-                            const rId = await useFirebase().createChatRoom(req.studentId);
+                            const rId = await createChatRoom(req.studentId);
                             setActiveChatId(rId);
                             setActiveTab("chats");
                           }}
@@ -179,7 +184,7 @@ export const TutorDashboard: React.FC = () => {
                         </button>
                         <button 
                           onClick={() => updateBookingStatus(req.id, "confirmed")}
-                          className="py-2 px-3 bg-black hover:bg-neutral-900 text-white rounded flex items-center gap-1.5 cursor-pointer font-bold text-xs uppercase tracking-wider border-2 border-black shadow-[2px_2px_0px_0px_rgba(75,85,99,1)]"
+                          className="py-2 px-3 bg-black hover:bg-neutral-900 text-white rounded flex items-center gap-1.5 cursor-pointer font-bold text-xs uppercase tracking-wider border-2 border-black shadow-[2px_2px_0px_0px_rgba(17,24,39,1)]"
                         >
                           <Check size={14} /> Accept Class
                         </button>
@@ -201,7 +206,7 @@ export const TutorDashboard: React.FC = () => {
                   </div>
                 ) : (
                   confirmedSessions.map(sess => (
-                    <div key={sess.id} className="bg-white border-2 border-black rounded-lg p-4 flex items-center justify-between gap-4 shadow-[4px_4px_0px_0px_rgba(75,85,99,1)]">
+                    <div key={sess.id} className="bg-white border-2 border-black rounded-lg p-4 flex items-center justify-between gap-4 shadow-[4px_4px_0px_0px_rgba(17,24,39,1)]">
                       <div>
                         <div className="flex items-center gap-1.5">
                           <h4 className="font-bold text-sm text-black font-display">{sess.studentName}</h4>
@@ -229,70 +234,241 @@ export const TutorDashboard: React.FC = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="space-y-4"
+              className="space-y-6"
             >
-              <h2 className="text-xl font-bold font-display text-black uppercase tracking-tight mb-2">Student Booking Requests</h2>
-
-              {pendingRequests.length === 0 ? (
-                <div className="py-12 text-center bg-white rounded-xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(75,85,99,1)]">
-                  <Users className="mx-auto mb-4 text-black" size={32} />
-                  <h3 className="text-black font-bold uppercase tracking-wider font-display">No requests</h3>
-                  <p className="text-xs text-neutral-500 mt-1">
-                    Your certified educator profile is live. Student queries will sync here dynamically.
-                  </p>
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-xl font-bold font-display text-black uppercase tracking-tight">Classroom Logs &amp; Scheduler</h2>
+                  <p className="text-xs text-neutral-500 font-mono mt-0.5">Control requests, upcoming active events, and history vaults.</p>
                 </div>
-              ) : (
-                pendingRequests.map((req) => (
-                  <div key={req.id} className="bg-white border-2 border-black rounded-lg p-5 shadow-[4px_4px_0px_0px_rgba(75,85,99,1)] space-y-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-mono font-bold bg-neutral-100 text-black border-2 border-black py-1 px-2.5 rounded">
-                        {req.subject}
-                      </span>
-                      <span className="text-xs text-neutral-600 font-bold">Class: <strong>{req.grade}</strong></span>
-                    </div>
 
-                    <div className="font-sans">
-                      <h3 className="font-bold text-black text-base">{req.studentName}</h3>
-                      <p className="text-neutral-500 text-sm mt-0.5">
-                        Scheduled Class on {req.date} at {req.time} ({req.mode})
+                {/* SUB-TABS SWITCHER */}
+                <div className="flex border-2 border-black rounded-lg overflow-hidden bg-white shadow-[2px_2px_0px_0px_rgba(17,24,39,1)] self-start md:self-auto shrink-0 font-mono text-xs font-bold">
+                  <button
+                    onClick={() => setSessionSubTab("requests")}
+                    className={`px-3 py-1.5 transition-all text-[11px] uppercase cursor-pointer ${
+                      sessionSubTab === "requests" 
+                        ? "bg-black text-white" 
+                        : "bg-white text-neutral-600 hover:text-black hover:bg-neutral-50"
+                    }`}
+                  >
+                    Requests ({pendingRequests.length})
+                  </button>
+                  <button
+                    onClick={() => setSessionSubTab("upcoming")}
+                    className={`px-3 py-1.5 transition-all text-[11px] uppercase cursor-pointer border-l-2 border-black ${
+                      sessionSubTab === "upcoming" 
+                        ? "bg-black text-white" 
+                        : "bg-white text-neutral-600 hover:text-black hover:bg-neutral-50"
+                    }`}
+                  >
+                    Upcoming ({confirmedSessions.length})
+                  </button>
+                  <button
+                    onClick={() => setSessionSubTab("history")}
+                    className={`px-3 py-1.5 transition-all text-[11px] uppercase cursor-pointer border-l-2 border-black ${
+                      sessionSubTab === "history" 
+                        ? "bg-black text-white" 
+                        : "bg-white text-neutral-600 hover:text-black hover:bg-neutral-50"
+                    }`}
+                  >
+                    History ({tutorBookings.filter(b => b.status === "completed" || b.status === "cancelled").length})
+                  </button>
+                </div>
+              </div>
+
+              {/* VIEW LOGIC FOR REQUESTS INBOX SUB-TAB */}
+              {sessionSubTab === "requests" && (
+                <div className="space-y-4">
+                  {pendingRequests.length === 0 ? (
+                    <div className="py-12 text-center bg-white rounded-xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(17,24,39,1)]">
+                      <Users className="mx-auto mb-4 text-black" size={32} />
+                      <h3 className="text-black font-bold uppercase tracking-wider font-display">No pending requests</h3>
+                      <p className="text-xs text-neutral-500 mt-1 max-w-sm mx-auto px-4">
+                        Your professional profile invitation is live. New student requests will schedule here dynamically.
                       </p>
                     </div>
+                  ) : (
+                    pendingRequests.map((req) => (
+                      <div key={req.id} className="bg-white border-2 border-black rounded-lg p-5 shadow-[4px_4px_0px_0px_rgba(17,24,39,1)] space-y-4">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-mono font-bold bg-neutral-100 text-black border-2 border-black py-1 px-2.5 rounded">
+                            {req.subject}
+                          </span>
+                          <span className="text-xs text-neutral-650 font-bold">Class: <strong>{req.grade || "Secondary"}</strong></span>
+                        </div>
 
-                    {req.msg && (
-                      <div className="p-3 bg-neutral-50 border-2 border-neutral-250 rounded text-xs text-neutral-600 italic leading-relaxed">
-                        "{req.msg}"
+                        <div className="font-sans">
+                          <h3 className="font-bold text-black text-base">{req.studentName}</h3>
+                          <p className="text-neutral-500 text-sm mt-0.5">
+                            Requested Session on {req.date} at {req.time} ({req.mode})
+                          </p>
+                        </div>
+
+                        {req.msg && (
+                          <div className="p-3 bg-neutral-50 border-2 border-neutral-250 rounded text-xs text-neutral-650 italic leading-relaxed">
+                            "{req.msg}"
+                          </div>
+                        )}
+
+                        <div className="flex gap-2 pt-1 border-t-2 border-neutral-100">
+                          <button
+                            onClick={async () => {
+                              const rId = await createChatRoom(req.studentId);
+                              setActiveChatId(rId);
+                              setActiveTab("chats");
+                            }}
+                            className="flex-1 py-1.5 bg-white text-black hover:bg-neutral-50 border-2 border-black text-xs font-bold rounded flex items-center justify-center gap-1.5 uppercase tracking-wide cursor-pointer"
+                          >
+                            <MessageSquare size={13} />
+                            Dialogue
+                          </button>
+                          <button
+                            onClick={() => updateBookingStatus(req.id, "cancelled")}
+                            className="p-1.5 bg-white hover:bg-rose-50 border-2 border-black text-rose-650 rounded w-10 flex items-center justify-center cursor-pointer"
+                            title="Decline"
+                          >
+                            <X size={14} />
+                          </button>
+                          <button
+                            onClick={() => updateBookingStatus(req.id, "confirmed")}
+                            className="flex-1 py-1.5 bg-black hover:bg-neutral-900 border-2 border-black text-white font-bold text-xs rounded flex items-center justify-center gap-1 shadow-[2px_2px_0px_0px_rgba(17,24,39,1)] uppercase tracking-wide cursor-pointer"
+                          >
+                            <Check size={14} />
+                            Accept Class
+                          </button>
+                        </div>
                       </div>
-                    )}
+                    ))
+                  )}
+                </div>
+              )}
 
-                    <div className="flex gap-2 pt-1 border-t-2 border-neutral-100">
-                      <button
-                        onClick={async () => {
-                          const rId = await useFirebase().createChatRoom(req.studentId);
-                          setActiveChatId(rId);
-                          setActiveTab("chats");
-                        }}
-                        className="flex-1 py-2 bg-white text-black hover:bg-neutral-50 border-2 border-black text-xs font-bold rounded flex items-center justify-center gap-1.5 uppercase tracking-wide cursor-pointer"
-                      >
-                        <MessageSquare size={13} />
-                        Dialogue
-                      </button>
-                      <button
-                        onClick={() => updateBookingStatus(req.id, "cancelled")}
-                        className="p-2 bg-white hover:bg-neutral-50 border-2 border-black text-black rounded"
-                        title="Decline"
-                      >
-                        <X size={14} />
-                      </button>
-                      <button
-                        onClick={() => updateBookingStatus(req.id, "confirmed")}
-                        className="flex-1 py-2 bg-black hover:bg-neutral-900 border-2 border-black text-white font-bold text-xs rounded flex items-center justify-center gap-1 shadow-[2px_2px_0px_0px_rgba(75,85,99,1)] uppercase tracking-wide cursor-pointer"
-                      >
-                        <Check size={14} />
-                        Accept Class
-                      </button>
+              {/* VIEW LOGIC FOR UPCOMING SCHEDULES SUB-TAB */}
+              {sessionSubTab === "upcoming" && (
+                <div className="space-y-4">
+                  {confirmedSessions.length === 0 ? (
+                    <div className="py-12 text-center bg-white rounded-xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(17,24,39,1)]">
+                      <Calendar className="mx-auto mb-4 text-black" size={32} />
+                      <h3 className="text-black font-bold uppercase tracking-wider font-display">No upcoming classes</h3>
+                      <p className="text-xs text-neutral-500 mt-1 max-w-sm mx-auto px-4">
+                        Accept student lecture bookings under the Requests log panel to create active itineraries.
+                      </p>
                     </div>
-                  </div>
-                ))
+                  ) : (
+                    confirmedSessions.map((sess) => (
+                      <div key={sess.id} className="bg-white border-2 border-black rounded-lg p-5 shadow-[4px_4px_0px_0px_rgba(17,24,39,1)] space-y-4">
+                        <div className="flex items-center justify-between gap-2.5">
+                          <div>
+                            <div className="flex items-center gap-1.5">
+                              <h4 className="font-bold text-base text-black font-display">{sess.studentName}</h4>
+                              <span className="text-[8px] font-bold font-mono tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-400 py-0.5 px-2 rounded-full uppercase">
+                                Scheduled
+                              </span>
+                            </div>
+                            <p className="text-neutral-500 text-xs font-semibold mt-0.5 font-mono">
+                              📖 {sess.subject} &nbsp;·&nbsp; Mode: <strong>{sess.mode}</strong>
+                            </p>
+                          </div>
+                          <span className="text-xs font-mono font-bold text-black bg-neutral-100 py-1 px-2.5 rounded border border-black">
+                            ₹{sess.rate} fee
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 pt-2 border-y border-neutral-100 pb-2">
+                          <div className="bg-neutral-50 p-2 text-center border border-black rounded">
+                            <span className="block text-[8px] font-bold text-neutral-500 font-mono tracking-wider uppercase">Scheduled Date</span>
+                            <span className="text-xs font-bold text-black">{sess.date}</span>
+                          </div>
+                          <div className="bg-neutral-50 p-2 text-center border border-black rounded">
+                            <span className="block text-[8px] font-bold text-neutral-500 font-mono tracking-wider uppercase">Lecture Time</span>
+                            <span className="text-xs font-bold text-black">{sess.time}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                          <button
+                            onClick={async () => {
+                              const rId = await createChatRoom(sess.studentId);
+                              setActiveChatId(rId);
+                              setActiveTab("chats");
+                            }}
+                            className="flex-1 py-1.5 bg-white hover:bg-neutral-50 border-2 border-black text-black text-xs font-bold rounded cursor-pointer flex items-center justify-center gap-1 transition-all"
+                          >
+                            <MessageSquare size={13} /> Chat Student
+                          </button>
+                          
+                          <button
+                            onClick={() => updateBookingStatus(sess.id, "cancelled")}
+                            className="flex-1 py-1.5 bg-white text-rose-650 hover:bg-rose-50 border-2 border-black text-xs font-bold rounded cursor-pointer transition-all"
+                          >
+                            Cancel Class (Refund Student)
+                          </button>
+
+                          <button
+                            onClick={() => updateBookingStatus(sess.id, "completed")}
+                            className="flex-1 py-1.5 bg-black hover:bg-neutral-900 border-2 border-black text-white text-xs font-bold rounded cursor-pointer flex items-center justify-center gap-1 shadow-[2px_2px_0px_0px_rgba(17,24,39,1)] transition-all active:translate-y-[1px]"
+                          >
+                            <CheckCircle2 size={13} /> Complete Class
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+
+              {/* VIEW LOGIC FOR HISTORICAL LOGS SUB-TAB */}
+              {sessionSubTab === "history" && (
+                <div className="space-y-4">
+                  {tutorBookings.filter(b => b.status === "completed" || b.status === "cancelled").length === 0 ? (
+                    <div className="py-12 text-center bg-white rounded-xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(17,24,39,1)]">
+                      <Sparkles className="mx-auto mb-4 text-black" size={32} />
+                      <h3 className="text-black font-bold uppercase tracking-wider font-display">Historical archives empty</h3>
+                      <p className="text-xs text-neutral-500 mt-1 max-w-sm mx-auto px-4">
+                        Complete lessons or resolve student bookings to compile historical reference indices.
+                      </p>
+                    </div>
+                  ) : (
+                    tutorBookings
+                      .filter(b => b.status === "completed" || b.status === "cancelled")
+                      .map((log) => (
+                        <div key={log.id} className="bg-white border-2 border-black rounded-lg p-5 shadow-[4px_4px_0px_0px_rgba(17,24,39,1)] space-y-4 relative overflow-hidden">
+                          <div className="flex items-center justify-between gap-2.5">
+                            <div>
+                              <h4 className="font-bold text-sm text-black font-display">{log.studentName}</h4>
+                              <p className="text-neutral-500 text-xs font-semibold mt-0.5 font-mono">
+                                📖 {log.subject} &nbsp;·&nbsp; {log.date} @ {log.time}
+                              </p>
+                            </div>
+                            
+                            <span className={`text-[9px] font-mono font-extrabold uppercase tracking-widest py-1 px-2 border-2 rounded ${
+                              log.status === "completed"
+                                ? "bg-black text-white border-black"
+                                : "bg-rose-50 text-rose-700 border-rose-400"
+                            }`}>
+                              {log.status}
+                            </span>
+                          </div>
+
+                          <div className="pt-2 border-t border-neutral-100 flex items-center justify-between text-xs font-mono">
+                            <span className="text-neutral-500">Lecture Rate:</span>
+                            <span className={`font-bold ${log.status === 'cancelled' ? 'line-through text-neutral-400' : 'text-black'}`}>₹{log.rate}</span>
+                          </div>
+
+                          {log.status === "completed" ? (
+                            <div className="p-2 bg-emerald-50 text-emerald-800 border border-emerald-300 rounded text-[10px] text-center font-bold uppercase tracking-wider">
+                              ✓ cleared: ₹{log.rate} added successfully to withdrawable balance.
+                            </div>
+                          ) : (
+                            <div className="p-2 bg-rose-50 text-rose-800 border border-rose-300 rounded text-[10px] text-center font-bold uppercase tracking-wider">
+                              ✕ cancelled: Student credited back ₹{log.rate} fully.
+                            </div>
+                          )}
+                        </div>
+                      ))
+                  )}
+                </div>
               )}
             </motion.div>
           )}
@@ -323,7 +499,6 @@ export const TutorDashboard: React.FC = () => {
                       key={c.id}
                       onClick={() => {
                         setActiveChatId(c.id);
-                        useFirebase().setActiveChatId(c.id);
                       }}
                       className={`p-4 rounded-lg border-2 transition-all cursor-pointer flex items-center gap-4 ${
                         hasUnread 
@@ -332,11 +507,15 @@ export const TutorDashboard: React.FC = () => {
                       }`}
                     >
                       <div 
-                        className="w-11 h-11 rounded-full border-2 border-black flex items-center justify-center font-bold text-white uppercase bg-black relative flex-shrink-0"
+                        className="w-11 h-11 rounded-full border-2 border-black flex items-center justify-center font-bold text-white uppercase bg-black relative flex-shrink-0 overflow-hidden"
                       >
-                        {c.studentAvatar || "S"}
+                        {c.studentAvatar && (c.studentAvatar.startsWith("data:image/") || c.studentAvatar.startsWith("http")) ? (
+                          <img src={c.studentAvatar} alt={c.studentName || "Student"} className="w-full h-full object-cover" />
+                        ) : (
+                          c.studentAvatar || "S"
+                        )}
                         {hasUnread && (
-                          <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-black border border-white rounded-full animate-pulse" />
+                          <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-black border border-white rounded-full animate-pulse z-10" />
                         )}
                       </div>
 
@@ -373,7 +552,7 @@ export const TutorDashboard: React.FC = () => {
               className="space-y-6"
             >
               {/* Wallet Balance Card */}
-               <div className="bg-white border-2 border-black rounded-lg p-6 relative overflow-hidden shadow-[4px_4px_0px_0px_rgba(75,85,99,1)]">
+               <div className="bg-white border-2 border-black rounded-lg p-6 relative overflow-hidden shadow-[4px_4px_0px_0px_rgba(17,24,39,1)]">
                 <span className="text-[10px] font-bold tracking-wider font-mono text-neutral-500 uppercase">Withdrawable Clearance balance</span>
                 <h3 className="text-4xl font-bold font-display text-black mt-1.5 flex items-baseline gap-1 uppercase">
                   ₹{userProfile?.walletBalance || 0}
@@ -394,7 +573,7 @@ export const TutorDashboard: React.FC = () => {
                       }
                       withdrawFunding(bal);
                     }}
-                    className="w-full py-3 bg-black hover:bg-neutral-900 border-2 border-black text-white font-bold text-xs rounded-lg shadow-[2px_2px_0px_0px_rgba(75,85,99,1)] uppercase tracking-wide transition-all cursor-pointer text-center flex items-center justify-center gap-2"
+                    className="w-full py-3 bg-black hover:bg-neutral-900 border-2 border-black text-white font-bold text-xs rounded-lg shadow-[2px_2px_0px_0px_rgba(17,24,39,1)] uppercase tracking-wide transition-all cursor-pointer text-center flex items-center justify-center gap-2"
                   >
                     Withdraw All Earnings Instant (₹{userProfile?.walletBalance || 0})
                   </button>
@@ -402,7 +581,7 @@ export const TutorDashboard: React.FC = () => {
               </div>
 
               {/* INCOME POTENTIAL CALCULATOR */}
-              <div className="bg-white border-2 border-black rounded-lg p-5 space-y-4 shadow-[4px_4px_0px_0px_rgba(75,85,99,1)]">
+              <div className="bg-white border-2 border-black rounded-lg p-5 space-y-4 shadow-[4px_4px_0px_0px_rgba(17,24,39,1)]">
                 <div className="flex items-center gap-2 text-black">
                   <TrendingUp size={16} className="text-black" />
                   <h4 className="font-bold text-sm font-display uppercase tracking-wide">Estimator Calculator</h4>
@@ -454,12 +633,16 @@ export const TutorDashboard: React.FC = () => {
               exit={{ opacity: 0, y: -10 }}
               className="space-y-6"
             >
-              <div className="bg-white border-2 border-black rounded-lg p-6 shadow-[4px_4px_0px_0px_rgba(75,85,99,1)] relative">
+              <div className="bg-white border-2 border-black rounded-lg p-6 shadow-[4px_4px_0px_0px_rgba(17,24,39,1)] relative">
                 <div className="flex items-center gap-4">
                   <div 
-                    className="w-16 h-16 rounded-full border-2 border-black flex items-center justify-center text-2xl font-bold text-white uppercase bg-black"
+                    className="w-16 h-16 rounded-full border-2 border-black flex items-center justify-center text-2xl font-bold text-white uppercase bg-black overflow-hidden shrink-0"
                   >
-                    {userProfile?.avatar || userProfile?.name.slice(0, 2)}
+                    {userProfile?.avatar && (userProfile.avatar.startsWith("data:image/") || userProfile.avatar.startsWith("http")) ? (
+                      <img src={userProfile.avatar} alt={userProfile.name} className="w-full h-full object-cover" />
+                    ) : (
+                      userProfile?.avatar || userProfile?.name.slice(0, 2)
+                    )}
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-black font-display uppercase tracking-wider flex items-center gap-1.5">
@@ -476,6 +659,70 @@ export const TutorDashboard: React.FC = () => {
 
                 {isEditing ? (
                   <div className="mt-6 pt-6 border-t-2 border-neutral-100 space-y-4">
+                    {/* Profile Picture Upload View */}
+                    <div className="flex flex-col sm:flex-row items-center gap-4 p-4 border-2 border-dashed border-black rounded-xl bg-neutral-50" id="tutor-upload-section">
+                      <div className="w-16 h-16 rounded-full border-2 border-black bg-black flex items-center justify-center text-white text-xl font-bold uppercase overflow-hidden shrink-0">
+                        {editAvatar && (editAvatar.startsWith("data:image/") || editAvatar.startsWith("http")) ? (
+                          <img src={editAvatar} alt="Preview" className="w-full h-full object-cover" />
+                        ) : (
+                          editAvatar || editName.slice(0, 2) || "T"
+                        )}
+                      </div>
+                      <div className="flex-1 space-y-1 text-center sm:text-left">
+                        <label className="text-[10px] font-bold uppercase tracking-wider text-black block">Profile Picture Image</label>
+                        <p className="text-[9px] text-neutral-500 font-mono">Upload JPG/PNG, auto-compressed to Firestore DB size</p>
+                        <div className="flex flex-wrap gap-2 pt-1 justify-center sm:justify-start">
+                          <label className="py-1 px-2.5 bg-black hover:bg-neutral-900 border border-black text-white text-[10px] font-bold rounded cursor-pointer uppercase tracking-wider">
+                            Choose File
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onload = (ev) => {
+                                    const img = new Image();
+                                    img.onload = () => {
+                                      const canvas = document.createElement("canvas");
+                                      const MAX_W = 150;
+                                      const MAX_H = 150;
+                                      let w = img.width;
+                                      let h = img.height;
+                                      if (w > h) {
+                                        if (w > MAX_W) { h *= MAX_W / w; w = MAX_W; }
+                                      } else {
+                                        if (h > MAX_H) { w *= MAX_H / h; h = MAX_H; }
+                                      }
+                                      canvas.width = w;
+                                      canvas.height = h;
+                                      const ctx = canvas.getContext("2d");
+                                      if (ctx) {
+                                        ctx.drawImage(img, 0, 0, w, h);
+                                        setEditAvatar(canvas.toDataURL("image/jpeg", 0.8));
+                                      }
+                                    };
+                                    img.src = ev.target?.result as string;
+                                  };
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                          </label>
+                          {editAvatar && (editAvatar.startsWith("data:image/") || editAvatar.startsWith("http")) && (
+                            <button
+                              type="button"
+                              onClick={() => setEditAvatar(userProfile?.name?.split(" ").filter(Boolean).map(w => w[0]).join("").toUpperCase().slice(0, 2) || "T")}
+                              className="py-1 px-2.5 bg-white hover:bg-neutral-50 border border-black text-black text-[10px] font-bold rounded cursor-pointer uppercase tracking-wider"
+                            >
+                              Remove Picture
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-1.5">
                         <label className="text-[10px] font-bold text-neutral-600 uppercase tracking-widest font-mono">Name</label>
@@ -528,7 +775,7 @@ export const TutorDashboard: React.FC = () => {
                     <div className="flex gap-2 pt-2">
                       <button
                         onClick={handleSaveProfile}
-                        className="flex-1 py-1.5 bg-black hover:bg-neutral-900 border-2 border-black text-white text-xs font-bold font-display uppercase tracking-wide rounded border-2 border-black shadow-[2px_2px_0px_0px_rgba(75,85,99,1)] cursor-pointer"
+                        className="flex-1 py-1.5 bg-black hover:bg-neutral-900 border-2 border-black text-white text-xs font-bold font-display uppercase tracking-wide rounded border-2 border-black shadow-[2px_2px_0px_0px_rgba(17,24,39,1)] cursor-pointer"
                       >
                         Save Settings
                       </button>
@@ -573,7 +820,7 @@ export const TutorDashboard: React.FC = () => {
                           setEditQual(userProfile?.qual || "");
                           setIsEditing(true);
                         }}
-                        className="w-full py-2 bg-white hover:bg-neutral-50 text-black border-2 border-black text-xs font-bold font-display uppercase tracking-wider rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-[2px_2px_0px_0px_rgba(75,85,99,1)]"
+                        className="w-full py-2 bg-white hover:bg-neutral-50 text-black border-2 border-black text-xs font-bold font-display uppercase tracking-wider rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-[2px_2px_0px_0px_rgba(17,24,39,1)]"
                       >
                         <Edit size={13} />
                         Update settings
@@ -605,8 +852,8 @@ export const TutorDashboard: React.FC = () => {
               activeTab === "requests" ? "text-white bg-black font-extrabold" : "text-neutral-500 hover:text-black"
             }`}
           >
-            <Users size={16} />
-            <span className="text-[9px] font-display uppercase tracking-widest font-bold scale-90">Requests</span>
+            <Calendar size={16} />
+            <span className="text-[9px] font-display uppercase tracking-widest font-bold scale-90">Sessions</span>
             {pendingRequests.length > 0 && (
               <span className="absolute top-2 right-6 w-2 h-2 bg-black border border-white rounded-full" />
             )}

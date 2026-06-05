@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { useFirebase } from "../FirebaseContext";
 import { SUBJECTS, GRADES, MODES, CITIES } from "../constants";
-import { MapPin, BookOpen, Layers, IndianRupee, Briefcase, Award, CheckCircle2 } from "lucide-react";
+import { MapPin, BookOpen, Layers, IndianRupee, Briefcase, Award, CheckCircle2, ArrowLeft } from "lucide-react";
 import { motion } from "motion/react";
 
 export const ProfileSetup: React.FC = () => {
-  const { userProfile, updateProfile, triggerToast } = useFirebase();
+  const { userProfile, updateProfile, logOut, triggerToast } = useFirebase();
   const isTutor = userProfile?.role === "tutor";
 
   // Shared state
@@ -14,6 +14,7 @@ export const ProfileSetup: React.FC = () => {
   const [cityMatches, setCityMatches] = useState<string[]>([]);
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [selectedGrade, setSelectedGrade] = useState("");
+  const [avatar, setAvatar] = useState("");
 
   // Tutor Specific
   const [fee, setFee] = useState("");
@@ -84,7 +85,7 @@ export const ProfileSetup: React.FC = () => {
         qual,
         bio,
         online: true,
-        avatar: userProfile?.name?.split(" ").filter(Boolean).map(w => w[0]).join("").toUpperCase().slice(0, 2) || "T",
+        avatar: avatar || userProfile?.name?.split(" ").filter(Boolean).map(w => w[0]).join("").toUpperCase().slice(0, 2) || "T",
         color: "#000000"
       });
     } else {
@@ -94,7 +95,7 @@ export const ProfileSetup: React.FC = () => {
         grade: selectedGrade,
         maxFee: Number(maxFee),
         online: true,
-        avatar: userProfile?.name?.split(" ").filter(Boolean).map(w => w[0]).join("").toUpperCase().slice(0, 2) || "S",
+        avatar: avatar || userProfile?.name?.split(" ").filter(Boolean).map(w => w[0]).join("").toUpperCase().slice(0, 2) || "S",
         color: "#000000"
       });
     }
@@ -106,8 +107,17 @@ export const ProfileSetup: React.FC = () => {
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.3 }}
-        className="w-full max-w-2xl bg-white border-2 border-black rounded-xl p-8 shadow-[8px_8px_0px_0px_rgba(75,85,99,1)] relative"
+        className="w-full max-w-2xl bg-white border-2 border-black rounded-xl p-8 shadow-[8px_8px_0px_0px_rgba(17,24,39,1)] relative"
       >
+        <button
+          type="button"
+          onClick={logOut}
+          className="mb-6 flex items-center gap-1.5 text-xs font-bold font-mono text-neutral-600 hover:text-black transition-all bg-white py-1.5 px-3 border-2 border-black rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none cursor-pointer"
+        >
+          <ArrowLeft size={14} />
+          <span>Back to Login</span>
+        </button>
+
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-8 pb-6 border-b-2 border-neutral-100">
           <div className="p-3 bg-black text-white rounded-lg border-2 border-black w-fit">
             <BookOpen size={24} />
@@ -122,6 +132,75 @@ export const ProfileSetup: React.FC = () => {
         </div>
 
         <form onSubmit={handleSave} className="space-y-6">
+          
+          {/* PROFILE PICTURE FIELD */}
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-black uppercase tracking-wider font-mono flex items-center gap-1.5">
+              <span>👤 Profile Picture</span>
+            </label>
+            <div className="flex flex-col sm:flex-row items-center gap-4 p-4 border-2 border-dashed border-black rounded-xl bg-neutral-50">
+              <div className="w-16 h-16 rounded-full border-2 border-black bg-black flex items-center justify-center text-white text-xl font-bold uppercase overflow-hidden shrink-0">
+                {avatar && (avatar.startsWith("data:image/") || avatar.startsWith("http")) ? (
+                  <img src={avatar} alt="Preview" className="w-full h-full object-cover" />
+                ) : (
+                  userProfile?.name?.split(" ").filter(Boolean).map(w => w[0]).join("").toUpperCase().slice(0, 2) || (isTutor ? "T" : "S")
+                )}
+              </div>
+              <div className="flex-1 space-y-1 text-center sm:text-left">
+                <p className="text-xs font-bold text-black uppercase">Set Your Profile Image</p>
+                <p className="text-[10px] text-neutral-500 font-mono">Upload JPG/PNG, auto-compressed for Firestore compatibility</p>
+                <div className="flex flex-wrap gap-2 pt-1 justify-center sm:justify-start">
+                  <label className="py-1 px-2.5 bg-black hover:bg-neutral-900 border border-black text-white text-[10px] font-bold rounded cursor-pointer uppercase tracking-wider">
+                    Choose File
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = (ev) => {
+                            const img = new Image();
+                            img.onload = () => {
+                              const canvas = document.createElement("canvas");
+                              const MAX_W = 150;
+                              const MAX_H = 150;
+                              let w = img.width;
+                              let h = img.height;
+                              if (w > h) {
+                                if (w > MAX_W) { h *= MAX_W / w; w = MAX_W; }
+                              } else {
+                                if (h > MAX_H) { w *= MAX_H / h; h = MAX_H; }
+                              }
+                              canvas.width = w;
+                              canvas.height = h;
+                              const ctx = canvas.getContext("2d");
+                              if (ctx) {
+                                ctx.drawImage(img, 0, 0, w, h);
+                                setAvatar(canvas.toDataURL("image/jpeg", 0.8));
+                              }
+                            };
+                            img.src = ev.target?.result as string;
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                  </label>
+                  {avatar && (avatar.startsWith("data:image/") || avatar.startsWith("http")) && (
+                    <button
+                      type="button"
+                      onClick={() => setAvatar("")}
+                      className="py-1 px-2.5 bg-white hover:bg-neutral-50 border border-black text-black text-[10px] font-bold rounded cursor-pointer uppercase tracking-wider"
+                    >
+                      Use Fallback Initials
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
           
           {/* CITY AUTOCOMPLETE */}
           <div className="space-y-2 relative">
@@ -343,7 +422,7 @@ export const ProfileSetup: React.FC = () => {
 
           <button
             type="submit"
-            className="w-full py-3.5 bg-black hover:bg-neutral-900 border-2 border-black text-white font-bold font-display uppercase tracking-widest text-xs rounded-lg shadow-[4px_4px_0px_0px_rgba(75,85,99,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all cursor-pointer"
+            className="w-full py-3.5 bg-black hover:bg-neutral-900 border-2 border-black text-white font-bold font-display uppercase tracking-widest text-xs rounded-lg shadow-[4px_4px_0px_0px_rgba(17,24,39,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all cursor-pointer"
           >
             Publish Profile Live
           </button>
