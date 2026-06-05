@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useFirebase } from "../FirebaseContext";
-import { ArrowLeft, CheckCircle2, Plus } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Plus, AlertCircle } from "lucide-react";
 import { motion } from "motion/react";
 
 interface BookingWizardProps {
@@ -19,6 +19,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ tutorIndex, onBack
   const [time, setTime] = useState("");
   const [mode, setMode] = useState<"Online" | "Offline">("Online");
   const [msg, setMsg] = useState("");
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   if (!tutor) {
     return (
@@ -34,7 +35,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ tutorIndex, onBack
   const userBalance = userProfile?.walletBalance || 0;
   const insufficientFunds = userBalance < tutor.rate;
 
-  const handleBookingSubmit = async (e: React.FormEvent) => {
+  const handleBookingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!subject) {
       triggerToast("Please choose your focal lesson subject.");
@@ -54,6 +55,11 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ tutorIndex, onBack
       return;
     }
 
+    setShowConfirmModal(true);
+  };
+
+  const confirmBooking = async () => {
+    setShowConfirmModal(false);
     await bookSession({
       studentId: userProfile?.uid || "anon",
       studentName: userProfile?.name || "Student",
@@ -263,6 +269,76 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ tutorIndex, onBack
           </button>
         </form>
       </div>
+
+      {/* CONFIRMATION MODAL */}
+      {showConfirmModal && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in"
+          id="confirm-booking-modal-overlay"
+        >
+          <motion.div 
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            className="bg-white border-4 border-black p-6 rounded-xl max-w-sm w-full space-y-4 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-black"
+            id="confirm-booking-modal"
+          >
+            <div className="flex items-center gap-3 border-b-2 border-black pb-3">
+              <div className="p-2 bg-amber-100 border-2 border-black rounded-lg text-amber-600">
+                <AlertCircle size={20} />
+              </div>
+              <div>
+                <h4 className="font-bold font-display uppercase tracking-wider text-sm">Confirm Booking Request</h4>
+                <p className="text-[10px] text-neutral-500 font-mono font-bold uppercase">Accidental Scheduling Check</p>
+              </div>
+            </div>
+
+            <div className="space-y-2.5 my-2">
+              <p className="text-xs text-neutral-600 font-sans leading-relaxed">
+                Are you sure you want to request a session with <span className="font-bold text-black">{tutor.name}</span>? Please verify the booking details.
+              </p>
+              
+              <div className="bg-neutral-50 border-2 border-black p-3 rounded-lg space-y-1.5 font-mono text-[11px] text-neutral-700">
+                <div className="flex justify-between">
+                  <span className="text-neutral-500 font-bold">SUBJECT:</span>
+                  <span className="font-bold text-black uppercase">{subject}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-neutral-500 font-bold">SCHEDULE:</span>
+                  <span className="font-bold text-black">{date} · {time}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-neutral-500 font-bold">MODE:</span>
+                  <span className="font-bold text-black uppercase">{mode}</span>
+                </div>
+                <div className="flex justify-between pt-1.5 border-t border-black/10">
+                  <span className="text-neutral-500 font-bold">FEE DEBIT:</span>
+                  <span className="font-bold text-black">₹{tutor.rate}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                id="cancel-booking-button"
+                onClick={() => setShowConfirmModal(false)}
+                className="flex-1 py-2.5 border-2 border-black rounded-lg text-xs font-bold font-display uppercase tracking-widest hover:bg-neutral-50 transition-all cursor-pointer text-center"
+              >
+                No, Cancel
+              </button>
+              <button
+                type="button"
+                id="confirm-booking-submit-button"
+                onClick={confirmBooking}
+                className="flex-1 py-2.5 bg-black border-2 border-black text-white rounded-lg text-xs font-bold font-display uppercase tracking-widest hover:bg-neutral-900 transition-all cursor-pointer shadow-[2px_2px_0px_0px_rgba(17,24,39,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none text-center"
+              >
+                Yes, Book
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };
