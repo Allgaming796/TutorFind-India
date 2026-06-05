@@ -26,7 +26,7 @@ export const CITIES = [
   "Bhopal", "Indore", "Jabalpur", "Gwalior", "Ujjain", "Sagar", "Ratlam", "Satna",
   "Mumbai", "Pune", "Nagpur", "Thane", "Nashik", "Aurangabad", "Solapur", "Kolhapur", "Amravati", "Nanded", "Sangli",
   "Imphal", "Thoubal", "Bishnupur", "Churachandpur",
-  "Shillong", "Tura", "Jowai",
+  "Shillong", "Tura", "Jowai", "Bongaigaon",
   "Aizawl", "Lunglei",
   "Kohima", "Dimapur", "Mokokchung",
   "Bhubaneswar", "Cuttack", "Rourkela", "Berhampur", "Sambalpur", "Puri",
