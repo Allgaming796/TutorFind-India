@@ -147,7 +147,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onSelectTuto
               className="space-y-6"
             >
               {/* Search Panel */}
-              <div className="bg-white rounded-xl border-2 border-black p-4 space-y-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div className="bg-white rounded-xl border-2 border-black p-4 space-y-4 shadow-[4px_4px_0px_0px_rgba(75,85,99,1)]">
                 <div className="relative">
                   <Search size={18} className="absolute left-4 top-3.5 text-neutral-500" />
                   <input
@@ -252,7 +252,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onSelectTuto
                       <motion.div
                       layout
                         key={tutor.uid}
-                        className="bg-white border-2 border-black rounded-lg p-5 hover:bg-neutral-50 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] transition-all relative overflow-hidden"
+                        className="bg-white border-2 border-black rounded-lg p-5 hover:bg-neutral-50 shadow-[4px_4px_0px_0px_rgba(75,85,99,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[5px_5px_0px_0px_rgba(75,85,99,1)] transition-all relative overflow-hidden"
                       >
                         {/* Status Rate & Favorite Button */}
                         <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
@@ -261,7 +261,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onSelectTuto
                               e.stopPropagation();
                               toggleFavorite(tutor.uid);
                             }}
-                            className={`p-1.5 border-2 border-black rounded-full transition-all cursor-pointer flex items-center justify-center shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none ${
+                            className={`p-1.5 border-2 border-black rounded-full transition-all cursor-pointer flex items-center justify-center shadow-[1px_1px_0px_0px_rgba(75,85,99,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none ${
                               favorites.includes(tutor.uid) 
                                 ? "bg-red-500 text-white hover:bg-red-600" 
                                 : "bg-white text-black hover:bg-neutral-50"
@@ -350,7 +350,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onSelectTuto
                                 onBookTutor(tIdx + 1);
                               }
                             }}
-                            className="flex-1 py-1.5 text-xs bg-black hover:bg-neutral-900 text-white rounded-md cursor-pointer font-bold transition-all flex items-center justify-center gap-1.5 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] uppercase tracking-wide border-2 border-black"
+                            className="flex-1 py-1.5 text-xs bg-black hover:bg-neutral-900 text-white rounded-md cursor-pointer font-bold transition-all flex items-center justify-center gap-1.5 shadow-[2px_2px_0px_0px_rgba(75,85,99,1)] uppercase tracking-wide border-2 border-black"
                           >
                             <Calendar size={13} />
                             Book Session
@@ -384,7 +384,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onSelectTuto
                 </div>
               ) : (
                 studentBookings.map((book) => (
-                  <div key={book.id} className="bg-white border-2 border-black rounded-lg p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] space-y-4">
+                  <div key={book.id} className="bg-white border-2 border-black rounded-lg p-5 shadow-[4px_4px_0px_0px_rgba(75,85,99,1)] space-y-4">
                     <div className="flex items-center gap-3">
                       <div 
                         className="w-10 h-10 rounded-full border-2 border-black flex items-center justify-center text-xs font-bold text-white uppercase bg-black"
@@ -516,7 +516,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onSelectTuto
               exit={{ opacity: 0, y: -10 }}
               className="space-y-6"
             >
-              <div className="bg-white border-2 border-black rounded-xl p-6 relative overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div className="bg-white border-2 border-black rounded-xl p-6 relative overflow-hidden shadow-[4px_4px_0px_0px_rgba(75,85,99,1)]">
                 <span className="text-[10px] font-bold tracking-wider font-mono text-neutral-500 uppercase">My Credit Balance</span>
                 <h3 className="text-4xl font-bold font-display text-black mt-1.5 flex items-baseline gap-1 uppercase">
                   ₹{userProfile?.walletBalance || 0}
@@ -530,7 +530,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onSelectTuto
                 <div className="grid grid-cols-2 gap-3 pt-5 border-t-2 border-neutral-100 mt-5">
                   <button 
                     onClick={() => addFunding(500)}
-                    className="py-3 px-4 bg-black hover:bg-neutral-900 border-2 border-black text-white font-bold text-xs rounded-lg transition-all cursor-pointer text-center flex items-center justify-center gap-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] uppercase tracking-wide"
+                    className="py-3 px-4 bg-black hover:bg-neutral-900 border-2 border-black text-white font-bold text-xs rounded-lg transition-all cursor-pointer text-center flex items-center justify-center gap-2 shadow-[2px_2px_0px_0px_rgba(75,85,99,1)] uppercase tracking-wide"
                   >
                     <PlusCircle size={14} /> Add ₹500
                   </button>
@@ -572,7 +572,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onSelectTuto
               exit={{ opacity: 0, y: -10 }}
               className="space-y-6"
             >
-              <div className="bg-white border-2 border-black rounded-lg p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative">
+              <div className="bg-white border-2 border-black rounded-lg p-6 shadow-[4px_4px_0px_0px_rgba(75,85,99,1)] relative">
                 <div className="flex items-center gap-4">
                   <div 
                     className="w-16 h-16 rounded-full border-2 border-black flex items-center justify-center text-2xl font-bold text-white uppercase bg-black"
@@ -640,7 +640,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onSelectTuto
                     <div className="flex gap-2 pt-2">
                       <button
                         onClick={handleSaveProfile}
-                        className="flex-1 py-2 bg-black hover:bg-neutral-950 text-white text-xs font-bold font-display uppercase tracking-wide rounded border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer"
+                        className="flex-1 py-2 bg-black hover:bg-neutral-950 text-white text-xs font-bold font-display uppercase tracking-wide rounded border-2 border-black shadow-[2px_2px_0px_0px_rgba(75,85,99,1)] cursor-pointer"
                       >
                         Save Configuration
                       </button>
@@ -684,7 +684,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onSelectTuto
                           setEditMaxFee(userProfile?.maxFee ? String(userProfile.maxFee) : "500");
                           setIsEditing(true);
                         }}
-                        className="w-full py-2 bg-white hover:bg-neutral-50 text-black border-2 border-black text-xs font-bold font-display uppercase tracking-wider rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                        className="w-full py-2 bg-white hover:bg-neutral-50 text-black border-2 border-black text-xs font-bold font-display uppercase tracking-wider rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-[2px_2px_0px_0px_rgba(75,85,99,1)]"
                       >
                         <Edit size={13} />
                         Modify Profile Details

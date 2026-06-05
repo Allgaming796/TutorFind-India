@@ -5,6 +5,7 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Colosalis", "Collosalis", "Playfair Display", "Space Grotesk", "Cinzel", serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --color-black: #4b5563;
 }
 
 /* Custom Scrollbar behavior */
@@ -19,5 +20,5 @@
 body {
   font-family: var(--font-sans);
   background-color: #ffffff;
-  color: #000000;
+  color: #4b5563;
 }

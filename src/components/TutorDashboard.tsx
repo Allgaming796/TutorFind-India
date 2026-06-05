@@ -103,21 +103,21 @@ export const TutorDashboard: React.FC = () => {
             >
               {/* Overview Cards */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div className="bg-white border-2 border-black p-4 rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                <div className="bg-white border-2 border-black p-4 rounded-lg shadow-[4px_4px_0px_0px_rgba(75,85,99,1)]">
                   <span className="text-[9px] font-bold text-neutral-500 font-mono tracking-wider uppercase block">HOURLY RATE</span>
                   <div className="text-xl font-bold font-display text-black mt-1">₹{userProfile?.rate || 0}/class</div>
                 </div>
-                <div className="bg-white border-2 border-black p-4 rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                <div className="bg-white border-2 border-black p-4 rounded-lg shadow-[4px_4px_0px_0px_rgba(75,85,99,1)]">
                   <span className="text-[9px] font-bold text-neutral-500 font-mono tracking-wider uppercase block">COINS CLEARED</span>
                   <div className="text-xl font-bold font-display text-black mt-1">₹{userProfile?.walletBalance || 0}</div>
                 </div>
-                <div className="bg-white border-2 border-black p-4 rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                <div className="bg-white border-2 border-black p-4 rounded-lg shadow-[4px_4px_0px_0px_rgba(75,85,99,1)]">
                   <span className="text-[9px] font-bold text-neutral-500 font-mono tracking-wider uppercase block">RATING</span>
                   <div className="text-xl font-bold font-display text-black mt-1 flex items-center gap-1">
                     {userProfile?.rating || "5.0"} <Star size={14} fill="currentColor" className="text-black" />
                   </div>
                 </div>
-                <div className="bg-white border-2 border-black p-4 rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                <div className="bg-white border-2 border-black p-4 rounded-lg shadow-[4px_4px_0px_0px_rgba(75,85,99,1)]">
                   <span className="text-[9px] font-bold text-neutral-500 font-mono tracking-wider uppercase block">CHATS</span>
                   <div className="text-xl font-bold font-display text-black mt-1">{chats.length}</div>
                 </div>
@@ -141,7 +141,7 @@ export const TutorDashboard: React.FC = () => {
                   </div>
                 ) : (
                   pendingRequests.slice(0, 3).map((req) => (
-                    <div key={req.id} className="bg-white border-2 border-black rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                    <div key={req.id} className="bg-white border-2 border-black rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-[4px_4px_0px_0px_rgba(75,85,99,1)]">
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="p-1 px-2 bg-neutral-100 text-black border border-neutral-350 rounded font-bold text-[9px] uppercase font-mono">
@@ -179,7 +179,7 @@ export const TutorDashboard: React.FC = () => {
                         </button>
                         <button 
                           onClick={() => updateBookingStatus(req.id, "confirmed")}
-                          className="py-2 px-3 bg-black hover:bg-neutral-900 text-white rounded flex items-center gap-1.5 cursor-pointer font-bold text-xs uppercase tracking-wider border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                          className="py-2 px-3 bg-black hover:bg-neutral-900 text-white rounded flex items-center gap-1.5 cursor-pointer font-bold text-xs uppercase tracking-wider border-2 border-black shadow-[2px_2px_0px_0px_rgba(75,85,99,1)]"
                         >
                           <Check size={14} /> Accept Class
                         </button>
@@ -201,7 +201,7 @@ export const TutorDashboard: React.FC = () => {
                   </div>
                 ) : (
                   confirmedSessions.map(sess => (
-                    <div key={sess.id} className="bg-white border-2 border-black rounded-lg p-4 flex items-center justify-between gap-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                    <div key={sess.id} className="bg-white border-2 border-black rounded-lg p-4 flex items-center justify-between gap-4 shadow-[4px_4px_0px_0px_rgba(75,85,99,1)]">
                       <div>
                         <div className="flex items-center gap-1.5">
                           <h4 className="font-bold text-sm text-black font-display">{sess.studentName}</h4>
@@ -234,7 +234,7 @@ export const TutorDashboard: React.FC = () => {
               <h2 className="text-xl font-bold font-display text-black uppercase tracking-tight mb-2">Student Booking Requests</h2>
 
               {pendingRequests.length === 0 ? (
-                <div className="py-12 text-center bg-white rounded-xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)]">
+                <div className="py-12 text-center bg-white rounded-xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(75,85,99,1)]">
                   <Users className="mx-auto mb-4 text-black" size={32} />
                   <h3 className="text-black font-bold uppercase tracking-wider font-display">No requests</h3>
                   <p className="text-xs text-neutral-500 mt-1">
@@ -243,7 +243,7 @@ export const TutorDashboard: React.FC = () => {
                 </div>
               ) : (
                 pendingRequests.map((req) => (
-                  <div key={req.id} className="bg-white border-2 border-black rounded-lg p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] space-y-4">
+                  <div key={req.id} className="bg-white border-2 border-black rounded-lg p-5 shadow-[4px_4px_0px_0px_rgba(75,85,99,1)] space-y-4">
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] font-mono font-bold bg-neutral-100 text-black border-2 border-black py-1 px-2.5 rounded">
                         {req.subject}
@@ -285,7 +285,7 @@ export const TutorDashboard: React.FC = () => {
                       </button>
                       <button
                         onClick={() => updateBookingStatus(req.id, "confirmed")}
-                        className="flex-1 py-2 bg-black hover:bg-neutral-900 border-2 border-black text-white font-bold text-xs rounded flex items-center justify-center gap-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] uppercase tracking-wide cursor-pointer"
+                        className="flex-1 py-2 bg-black hover:bg-neutral-900 border-2 border-black text-white font-bold text-xs rounded flex items-center justify-center gap-1 shadow-[2px_2px_0px_0px_rgba(75,85,99,1)] uppercase tracking-wide cursor-pointer"
                       >
                         <Check size={14} />
                         Accept Class
@@ -373,7 +373,7 @@ export const TutorDashboard: React.FC = () => {
               className="space-y-6"
             >
               {/* Wallet Balance Card */}
-              <div className="bg-white border-2 border-black rounded-lg p-6 relative overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+               <div className="bg-white border-2 border-black rounded-lg p-6 relative overflow-hidden shadow-[4px_4px_0px_0px_rgba(75,85,99,1)]">
                 <span className="text-[10px] font-bold tracking-wider font-mono text-neutral-500 uppercase">Withdrawable Clearance balance</span>
                 <h3 className="text-4xl font-bold font-display text-black mt-1.5 flex items-baseline gap-1 uppercase">
                   ₹{userProfile?.walletBalance || 0}
@@ -394,7 +394,7 @@ export const TutorDashboard: React.FC = () => {
                       }
                       withdrawFunding(bal);
                     }}
-                    className="w-full py-3 bg-black hover:bg-neutral-900 border-2 border-black text-white font-bold text-xs rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] uppercase tracking-wide transition-all cursor-pointer text-center flex items-center justify-center gap-2"
+                    className="w-full py-3 bg-black hover:bg-neutral-900 border-2 border-black text-white font-bold text-xs rounded-lg shadow-[2px_2px_0px_0px_rgba(75,85,99,1)] uppercase tracking-wide transition-all cursor-pointer text-center flex items-center justify-center gap-2"
                   >
                     Withdraw All Earnings Instant (₹{userProfile?.walletBalance || 0})
                   </button>
@@ -402,7 +402,7 @@ export const TutorDashboard: React.FC = () => {
               </div>
 
               {/* INCOME POTENTIAL CALCULATOR */}
-              <div className="bg-white border-2 border-black rounded-lg p-5 space-y-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div className="bg-white border-2 border-black rounded-lg p-5 space-y-4 shadow-[4px_4px_0px_0px_rgba(75,85,99,1)]">
                 <div className="flex items-center gap-2 text-black">
                   <TrendingUp size={16} className="text-black" />
                   <h4 className="font-bold text-sm font-display uppercase tracking-wide">Estimator Calculator</h4>
@@ -454,7 +454,7 @@ export const TutorDashboard: React.FC = () => {
               exit={{ opacity: 0, y: -10 }}
               className="space-y-6"
             >
-              <div className="bg-white border-2 border-black rounded-lg p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative">
+              <div className="bg-white border-2 border-black rounded-lg p-6 shadow-[4px_4px_0px_0px_rgba(75,85,99,1)] relative">
                 <div className="flex items-center gap-4">
                   <div 
                     className="w-16 h-16 rounded-full border-2 border-black flex items-center justify-center text-2xl font-bold text-white uppercase bg-black"
@@ -528,7 +528,7 @@ export const TutorDashboard: React.FC = () => {
                     <div className="flex gap-2 pt-2">
                       <button
                         onClick={handleSaveProfile}
-                        className="flex-1 py-1.5 bg-black hover:bg-neutral-900 border-2 border-black text-white text-xs font-bold font-display uppercase tracking-wide rounded border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer"
+                        className="flex-1 py-1.5 bg-black hover:bg-neutral-900 border-2 border-black text-white text-xs font-bold font-display uppercase tracking-wide rounded border-2 border-black shadow-[2px_2px_0px_0px_rgba(75,85,99,1)] cursor-pointer"
                       >
                         Save Settings
                       </button>
@@ -573,7 +573,7 @@ export const TutorDashboard: React.FC = () => {
                           setEditQual(userProfile?.qual || "");
                           setIsEditing(true);
                         }}
-                        className="w-full py-2 bg-white hover:bg-neutral-50 text-black border-2 border-black text-xs font-bold font-display uppercase tracking-wider rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                        className="w-full py-2 bg-white hover:bg-neutral-50 text-black border-2 border-black text-xs font-bold font-display uppercase tracking-wider rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-[2px_2px_0px_0px_rgba(75,85,99,1)]"
                       >
                         <Edit size={13} />
                         Update settings

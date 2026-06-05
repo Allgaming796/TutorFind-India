@@ -72,7 +72,7 @@ export const TutorProfileDetail: React.FC<TutorProfileDetailProps> = ({ tutorInd
         {userProfile?.role === "student" && (
           <button
             onClick={toggleFavorite}
-            className={`px-3 py-1.5 border-2 border-black rounded-lg transition-all cursor-pointer flex items-center gap-1.5 text-xs font-bold font-mono uppercase tracking-wider shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none ${
+            className={`px-3 py-1.5 border-2 border-black rounded-lg transition-all cursor-pointer flex items-center gap-1.5 text-xs font-bold font-mono uppercase tracking-wider shadow-[2px_2px_0px_0px_rgba(75,85,99,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none ${
               isFavorite ? "bg-red-500 text-white hover:bg-red-600" : "bg-white text-black hover:bg-neutral-50"
             }`}
             title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
@@ -87,7 +87,7 @@ export const TutorProfileDetail: React.FC<TutorProfileDetailProps> = ({ tutorInd
       <div className="flex-1 max-w-2xl w-full mx-auto p-4 space-y-6 pb-28">
         
         {/* HERO SECTION */}
-        <div className="bg-white border-2 border-black rounded-lg p-6 flex flex-col md:flex-row items-center md:items-start gap-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden">
+        <div className="bg-white border-2 border-black rounded-lg p-6 flex flex-col md:flex-row items-center md:items-start gap-5 shadow-[4px_4px_0px_0px_rgba(75,85,99,1)] relative overflow-hidden">
           <div 
             className="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold text-white bg-black uppercase shadow flex-shrink-0 border-2 border-black relative"
           >
@@ -126,7 +126,7 @@ export const TutorProfileDetail: React.FC<TutorProfileDetailProps> = ({ tutorInd
         </div>
 
         {/* DETAILS BIOGRAPHY */}
-        <div className="bg-white border-2 border-black rounded-lg p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] space-y-3">
+        <div className="bg-white border-2 border-black rounded-lg p-6 shadow-[4px_4px_0px_0px_rgba(75,85,99,1)] space-y-3">
           <div className="flex items-center gap-1.5 text-black">
             <Award size={14} className="text-black" />
             <h3 className="text-xs font-bold tracking-wider font-mono uppercase">Biography Statement</h3>
@@ -137,7 +137,7 @@ export const TutorProfileDetail: React.FC<TutorProfileDetailProps> = ({ tutorInd
         </div>
 
         {/* TARGET CLASSIFICATIONS */}
-        <div className="bg-white border-2 border-black rounded-lg p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] space-y-4">
+        <div className="bg-white border-2 border-black rounded-lg p-6 shadow-[4px_4px_0px_0px_rgba(75,85,99,1)] space-y-4">
           <div className="flex items-center gap-1.5 text-black">
             <BookOpen size={14} className="text-black" />
             <h3 className="text-xs font-bold tracking-wider font-mono uppercase">Subjects &amp; Grade Reach</h3>
@@ -172,7 +172,7 @@ export const TutorProfileDetail: React.FC<TutorProfileDetailProps> = ({ tutorInd
         </div>
 
         {/* FEEDBACK LIST */}
-        <div className="bg-white border-2 border-black rounded-lg p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] space-y-4">
+        <div className="bg-white border-2 border-black rounded-lg p-6 shadow-[4px_4px_0px_0px_rgba(75,85,99,1)] space-y-4">
           <div className="flex items-center gap-1.5 text-black">
             <Star size={14} className="text-black" />
             <h3 className="text-xs font-bold tracking-wider font-mono uppercase">Student Endorsements ({reviews.length})</h3>
@@ -221,7 +221,7 @@ export const TutorProfileDetail: React.FC<TutorProfileDetailProps> = ({ tutorInd
           </button>
           <button
             onClick={onBook}
-            className="flex-1 py-3 bg-black hover:bg-neutral-900 border-2 border-black text-white font-bold rounded-lg cursor-pointer text-xs flex items-center justify-center gap-2 active:translate-y-[1px] transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] uppercase tracking-wide font-display"
+            className="flex-1 py-3 bg-black hover:bg-neutral-900 border-2 border-black text-white font-bold rounded-lg cursor-pointer text-xs flex items-center justify-center gap-2 active:translate-y-[1px] transition-all shadow-[2px_2px_0px_0px_rgba(75,85,99,1)] uppercase tracking-wide font-display"
           >
             <Calendar size={14} />
             Reserve Slot

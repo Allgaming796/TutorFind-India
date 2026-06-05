@@ -106,7 +106,7 @@ export const ProfileSetup: React.FC = () => {
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.3 }}
-        className="w-full max-w-2xl bg-white border-2 border-black rounded-xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative"
+        className="w-full max-w-2xl bg-white border-2 border-black rounded-xl p-8 shadow-[8px_8px_0px_0px_rgba(75,85,99,1)] relative"
       >
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-8 pb-6 border-b-2 border-neutral-100">
           <div className="p-3 bg-black text-white rounded-lg border-2 border-black w-fit">
@@ -343,7 +343,7 @@ export const ProfileSetup: React.FC = () => {
 
           <button
             type="submit"
-            className="w-full py-3.5 bg-black hover:bg-neutral-900 border-2 border-black text-white font-bold font-display uppercase tracking-widest text-xs rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all cursor-pointer"
+            className="w-full py-3.5 bg-black hover:bg-neutral-900 border-2 border-black text-white font-bold font-display uppercase tracking-widest text-xs rounded-lg shadow-[4px_4px_0px_0px_rgba(75,85,99,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all cursor-pointer"
           >
             Publish Profile Live
           </button>

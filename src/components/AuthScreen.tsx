@@ -42,7 +42,7 @@ export const AuthScreen: React.FC = () => {
     } catch (err) {
       // If demo account doesn't exist yet, sign up automatically
       try {
-        await signUp(demoEmail, demoPass, selectedRole === "student" ? "Demo Student" : "ASHVIKA ", selectedRole);
+        await signUp(demoEmail, demoPass, selectedRole === "student" ? "Demo Student" : "ASHVIKA", selectedRole);
       } catch (signupErr) {
         triggerToast("Demo mode initialized in sandboxed state.");
       }
@@ -55,7 +55,7 @@ export const AuthScreen: React.FC = () => {
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="w-full max-w-md bg-white rounded-xl border-2 border-black p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden"
+        className="w-full max-w-md bg-white rounded-xl border-2 border-black p-8 shadow-[8px_8px_0px_0px_rgba(75,85,99,1)] relative overflow-hidden"
       >
         <div className="flex flex-col items-center mb-8">
           <div className="w-16 h-16 bg-black border-2 border-black rounded-lg flex items-center justify-center shadow-md text-white font-display font-bold text-3xl mb-4">
@@ -193,7 +193,7 @@ export const AuthScreen: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-black hover:bg-neutral-900 text-white font-bold font-display uppercase tracking-widest text-xs rounded-lg transition-all border-2 border-black flex items-center justify-center gap-2 cursor-pointer shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+            className="w-full py-3 bg-black hover:bg-neutral-900 text-white font-bold font-display uppercase tracking-widest text-xs rounded-lg transition-all border-2 border-black flex items-center justify-center gap-2 cursor-pointer shadow-[2px_2px_0px_0px_rgba(75,85,99,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
           >
             {loading ? (
               <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
