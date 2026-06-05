@@ -99,7 +99,7 @@ export const CITIES = [
   "Araria", "Arwal", "Banka", "Bhojpur (Ara)", "East Champaran (Motihari)", "Jamui", "Jehanabad", "Kaimur (Bhabua)",
   "Khagaria", "Lakhisarai", "Madhepura", "Madhubani", "Munger", "Nalanda (Bihar Sharif)", "Nawada", "Patna (Capital City)",
   "Rohtas (Sasaram)", "Saharsa", "Samastipur", "Saran (Chapra)", "Sheikhpura", "Sheohar", "Sitamarhi", "Supaul",
-  "Vaishali (Hajipur)"
+  "Vaishali (Hajipur)", "Bongaigaon"
 ].sort();
 
 export const STATE_GROUPS: { [key: string]: string[] } = {
